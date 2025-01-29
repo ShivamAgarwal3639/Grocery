@@ -1,9 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:grocerry/firebase/order_service.dart';
+import 'package:intl/intl.dart';
 import 'package:grocerry/models/cart_model.dart';
 import 'package:grocerry/models/order_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
 
 class OrderDetailsPage extends StatelessWidget {
   final OrderModel order;
@@ -43,18 +42,17 @@ class OrderDetailsPage extends StatelessWidget {
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         children: [
           _buildOrderStatus(),
-          const SizedBox(height: 12),
-          _buildOrderItems(),
-          const SizedBox(height: 12),
-          _buildDeliveryAddress(),
-          const SizedBox(height: 12),
-          _buildOrderSummary(),
-          const SizedBox(height: 12),
-          _buildSupportSection(context),
           const SizedBox(height: 16),
+          _buildOrderItems(),
+          const SizedBox(height: 16),
+          _buildDeliveryAddress(),
+          const SizedBox(height: 16),
+          _buildOrderSummary(),
+          const SizedBox(height: 16),
+          _buildSupportSection(),
         ],
       ),
     );
@@ -65,11 +63,11 @@ class OrderDetailsPage extends StatelessWidget {
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey[200]!),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -82,8 +80,8 @@ class OrderDetailsPage extends StatelessWidget {
                     Text(
                       DateFormat('MMM d, yyyy').format(order.createdAt),
                       style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -104,7 +102,7 @@ class OrderDetailsPage extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    'Tracking: ',
+                    'Tracking Number: ',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[600],
@@ -133,18 +131,18 @@ class OrderDetailsPage extends StatelessWidget {
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey[200]!),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             child: Text(
               'Items (${order.items.length})',
               style: const TextStyle(
-                fontSize: 15,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -158,16 +156,30 @@ class OrderDetailsPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final item = order.items[index];
               return Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: Image.network(
-                        item.product.imageUrl,
+                      borderRadius: BorderRadius.circular(8),
+                      child: CachedNetworkImage(
+                        imageUrl: item.product.imageUrl,
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.grey[200],
+                          child: Icon(Icons.error_outline, color: Colors.grey[400]),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -216,11 +228,11 @@ class OrderDetailsPage extends StatelessWidget {
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey[200]!),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -231,7 +243,7 @@ class OrderDetailsPage extends StatelessWidget {
                 const Text(
                   'Delivery Address',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -272,54 +284,72 @@ class OrderDetailsPage extends StatelessWidget {
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey[200]!),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Payment Summary',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
+            Row(
+              children: [
+                Icon(Icons.receipt_outlined, size: 18, color: Colors.grey[700]),
+                const SizedBox(width: 8),
+                const Text(
+                  'Payment Summary',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildSummaryRow('Subtotal', order.subtotal),
+            if (order.taxAndDeliverySettings.toggleServiceCharge) ...[
+              const SizedBox(height: 8),
+              _buildSummaryRow('Service Charge', order.serviceCharge),
+            ],
+            if (order.taxAndDeliverySettings.toggleDelivery) ...[
+              const SizedBox(height: 8),
+              _buildSummaryRow('Delivery Fee', order.deliveryFee),
+            ],
+            if (order.taxAndDeliverySettings.toggleTax) ...[
+              const SizedBox(height: 8),
+              _buildSummaryRow(
+                'Tax (${order.taxAndDeliverySettings.taxPercentage}%)',
+                order.tax,
               ),
+            ],
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1),
             ),
-            const SizedBox(height: 12),
-            _buildSummaryRow('Subtotal', '\$${order.subtotal.toStringAsFixed(2)}'),
-            const SizedBox(height: 8),
-            _buildSummaryRow('Tax', '\$${order.tax.toStringAsFixed(2)}'),
-            const Divider(height: 24),
-            _buildSummaryRow(
-              'Total',
-              '\$${order.total.toStringAsFixed(2)}',
-              isTotal: true,
-            ),
+            _buildSummaryRow('Total', order.total, isTotal: true),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
+  Widget _buildSummaryRow(String label, double amount, {bool isTotal = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: isTotal ? 14 : 13,
+            fontSize: isTotal ? 15 : 13,
             fontWeight: isTotal ? FontWeight.w600 : FontWeight.normal,
             color: isTotal ? Colors.black : Colors.grey[600],
           ),
         ),
         Text(
-          value,
+          '\$${amount.toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: isTotal ? 15 : 13,
-            fontWeight: isTotal ? FontWeight.w600 : FontWeight.normal,
+            fontWeight: isTotal ? FontWeight.w600 : FontWeight.w500,
             color: isTotal ? Colors.green[700] : Colors.black,
           ),
         ),
@@ -327,17 +357,17 @@ class OrderDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSupportSection(BuildContext context) {
+  Widget _buildSupportSection() {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.blue[100]!),
       ),
       color: Colors.blue[50],
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -375,10 +405,16 @@ class OrderDetailsPage extends StatelessWidget {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text('Contact Support'),
+                child: const Text(
+                  'Contact Support',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],

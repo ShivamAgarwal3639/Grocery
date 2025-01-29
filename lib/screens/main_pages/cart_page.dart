@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:grocerry/firebase/tax_delivery_service.dart';
 import 'package:grocerry/models/cart_model.dart';
+import 'package:grocerry/models/tax_delivery_model.dart';
 import 'package:grocerry/notifier/cart_notifier.dart';
 import 'package:grocerry/screens/checkout_page.dart';
 import 'package:provider/provider.dart';
@@ -10,57 +12,164 @@ import 'package:cached_network_image/cached_network_image.dart';
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
 
-  double calculateSubtotal(CartModel cart) {
-    return cart.items.fold(
-      0.0,
-          (prev, item) => prev + (item.price * item.quantity),
-    );
+  Future<TaxAndDeliveryModel?> _loadTaxSettings(BuildContext context) async {
+    final taxService = TaxAndDeliveryService();
+    // You might want to store this ID in your app's configuration
+    return await taxService.getTaxAndDelivery('default');
   }
 
-  double calculateTax(double subtotal) => subtotal * 0.13;
-  double calculateTotal(double subtotal, double tax) => subtotal + tax;
+  double calculateCharges(
+    CartModel cart,
+    TaxAndDeliveryModel settings,
+  ) {
+    final taxService = TaxAndDeliveryService();
+    return taxService.calculateTotalCharges(
+      cartValue: cart.subtotal,
+      settings: settings,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<CartNotifier>(
       builder: (context, cartNotifier, child) {
-        final cart = cartNotifier.cart;
-        final subtotal = calculateSubtotal(cart);
-        final tax = calculateTax(subtotal);
-        final total = calculateTotal(subtotal, tax);
+        return FutureBuilder<TaxAndDeliveryModel?>(
+          future: _loadTaxSettings(context),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-        return Scaffold(
-          backgroundColor: Colors.grey[50],
-          appBar: AppBar(
-            title: Text(
-              'My Cart (${cart.items.length})',
-              style: const TextStyle(fontSize: 18),
-            ),
-            centerTitle: true,
-            elevation: 0,
-            backgroundColor: Colors.white,
+            final cart = cartNotifier.cart;
+            final settings =
+                snapshot.data ?? TaxAndDeliveryModel(id: 'default');
+            final total = calculateCharges(cart, settings);
+
+            return Scaffold(
+              backgroundColor: Colors.grey[50],
+              appBar: AppBar(
+                title: Text(
+                  'My Cart (${cart.items.length})',
+                  style: const TextStyle(fontSize: 18),
+                ),
+                centerTitle: true,
+                elevation: 0,
+                backgroundColor: Colors.white,
+              ),
+              body: cart.items.isEmpty
+                  ? _buildEmptyCart(context)
+                  : Column(
+                      children: [
+                        Expanded(
+                          child: ListView.separated(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: cart.items.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (context, index) => _buildCartItem(
+                              context,
+                              cart.items[index],
+                              cartNotifier,
+                            ),
+                          ),
+                        ),
+                        _buildCheckoutSection(
+                          context,
+                          cart,
+                          settings,
+                          total,
+                        ),
+                      ],
+                    ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildCheckoutSection(
+    BuildContext context,
+    CartModel cart,
+    TaxAndDeliveryModel settings,
+    double total,
+  ) {
+    double serviceCharge =
+        settings.toggleServiceCharge ? settings.serviceChargeAmount : 0.0;
+    double deliveryFee = settings.toggleDelivery &&
+            (settings.deliveryFeeNotApplyIfCartValueGreaterThan == null ||
+                cart.subtotal <
+                    settings.deliveryFeeNotApplyIfCartValueGreaterThan!)
+        ? settings.deliveryFee
+        : 0.0;
+    double taxableAmount =serviceCharge + deliveryFee;
+    double tax = settings.toggleTax
+        ? taxableAmount * (settings.taxPercentage / 100)
+        : 0.0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, -1),
           ),
-          body: cart.items.isEmpty
-              ? _buildEmptyCart(context)
-              : Column(
-            children: [
-              Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: cart.items.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) => _buildCartItem(
-                    context,
-                    cart.items[index],
-                    cartNotifier,
+        ],
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildPriceRow('Subtotal', cart.subtotal),
+            if (settings.toggleServiceCharge) ...[
+              const SizedBox(height: 8),
+              _buildPriceRow('Service Charge', serviceCharge),
+            ],
+            if (settings.toggleDelivery) ...[
+              const SizedBox(height: 8),
+              _buildPriceRow('Delivery Fee', deliveryFee),
+            ],
+            if (settings.toggleTax) ...[
+              const SizedBox(height: 8),
+              _buildPriceRow(
+                  'Tax (${settings.taxPercentage.toStringAsFixed(1)}%)', tax),
+            ],
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 1),
+            ),
+            _buildPriceRow('Total', total, isTotal: true),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Get.to(() => CheckoutPage(
+                      taxAndDeliverySettings: settings,
+                    )),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green[700],
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Proceed to Checkout',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              _buildCheckoutSection(context, subtotal, tax, total),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -110,10 +219,10 @@ class CartPage extends StatelessWidget {
   }
 
   Widget _buildCartItem(
-      BuildContext context,
-      CartItemModel item,
-      CartNotifier cartNotifier,
-      ) {
+    BuildContext context,
+    CartItemModel item,
+    CartNotifier cartNotifier,
+  ) {
     return Dismissible(
       key: Key(item.id),
       direction: DismissDirection.endToStart,
@@ -229,7 +338,8 @@ class CartPage extends StatelessWidget {
                 children: [
                   _buildQuantityButton(
                     Icons.remove,
-                        () => cartNotifier.updateQuantity(item.id, item.quantity - 1),
+                    () =>
+                        cartNotifier.updateQuantity(item.id, item.quantity - 1),
                   ),
                   Container(
                     width: 32,
@@ -244,7 +354,8 @@ class CartPage extends StatelessWidget {
                   ),
                   _buildQuantityButton(
                     Icons.add,
-                        () => cartNotifier.updateQuantity(item.id, item.quantity + 1),
+                    () =>
+                        cartNotifier.updateQuantity(item.id, item.quantity + 1),
                   ),
                 ],
               ),
@@ -264,65 +375,6 @@ class CartPage extends StatelessWidget {
         onPressed: onPressed,
         padding: EdgeInsets.zero,
         color: Colors.grey[700],
-      ),
-    );
-  }
-
-  Widget _buildCheckoutSection(
-      BuildContext context,
-      double subtotal,
-      double tax,
-      double total,
-      ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, -1),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildPriceRow('Subtotal', subtotal),
-            const SizedBox(height: 8),
-            _buildPriceRow('Tax (13%)', tax),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(height: 1),
-            ),
-            _buildPriceRow('Total', total, isTotal: true),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Get.to(() => CheckoutPage()),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[700],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text(
-                  'Proceed to Checkout',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:grocerry/firebase/order_service.dart';
 import 'package:grocerry/models/cart_model.dart';
 import 'package:grocerry/models/order_model.dart';
 import 'package:grocerry/models/user_model.dart';
+import 'package:grocerry/models/tax_delivery_model.dart';
 import 'package:grocerry/notifier/address_provider.dart';
 import 'package:grocerry/notifier/cart_notifier.dart';
 import 'package:grocerry/screens/profile/address_screen.dart';
@@ -12,7 +13,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 
 class CheckoutPage extends StatefulWidget {
-  const CheckoutPage({super.key});
+  final TaxAndDeliveryModel taxAndDeliverySettings;
+
+  const CheckoutPage({
+    super.key,
+    required this.taxAndDeliverySettings,
+  });
 
   @override
   State<CheckoutPage> createState() => _CheckoutPageState();
@@ -21,6 +27,35 @@ class CheckoutPage extends StatefulWidget {
 class _CheckoutPageState extends State<CheckoutPage> {
   AddressModel? selectedAddress;
   bool isProcessing = false;
+
+  // Calculate charges based on current settings
+  Map<String, double> calculateCharges(CartModel cart) {
+    double subtotal = cart.subtotal;
+    double serviceCharge = widget.taxAndDeliverySettings.toggleServiceCharge
+        ? widget.taxAndDeliverySettings.serviceChargeAmount
+        : 0.0;
+
+    double deliveryFee = widget.taxAndDeliverySettings.toggleDelivery &&
+        (widget.taxAndDeliverySettings.deliveryFeeNotApplyIfCartValueGreaterThan == null ||
+            subtotal < widget.taxAndDeliverySettings.deliveryFeeNotApplyIfCartValueGreaterThan!)
+        ? widget.taxAndDeliverySettings.deliveryFee
+        : 0.0;
+
+    double taxableAmount = serviceCharge + deliveryFee;
+    double tax = widget.taxAndDeliverySettings.toggleTax
+        ? taxableAmount * (widget.taxAndDeliverySettings.taxPercentage / 100)
+        : 0.0;
+
+    double total = subtotal + serviceCharge + deliveryFee + tax;
+
+    return {
+      'subtotal': subtotal,
+      'serviceCharge': serviceCharge,
+      'deliveryFee': deliveryFee,
+      'tax': tax,
+      'total': total,
+    };
+  }
 
   Future<void> _placeOrder(BuildContext context) async {
     if (selectedAddress == null) {
@@ -41,17 +76,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
       final cartNotifier = Provider.of<CartNotifier>(context, listen: false);
       final cart = cartNotifier.cart;
+      final charges = calculateCharges(cart);
 
       final order = OrderModel(
         id: const Uuid().v4(),
         userId: user.uid,
         items: cart.items,
-        subtotal: cart.subtotal,
-        tax: cart.tax,
-        total: cart.total,
+        subtotal: charges['subtotal']!,
+        serviceCharge: charges['serviceCharge']!,
+        deliveryFee: charges['deliveryFee']!,
+        tax: charges['tax']!,
+        total: charges['total']!,
         shippingAddress: selectedAddress!,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
+        taxAndDeliverySettings: widget.taxAndDeliverySettings,
       );
 
       final orderService = OrderService();
@@ -93,6 +132,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       body: Consumer2<AddressProvider, CartNotifier>(
         builder: (context, addressProvider, cartNotifier, child) {
           final cart = cartNotifier.cart;
+          final charges = calculateCharges(cart);
 
           return Column(
             children: [
@@ -104,11 +144,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     const SizedBox(height: 24),
                     _buildPaymentSection(),
                     const SizedBox(height: 24),
-                    _buildOrderSummary(cart),
+                    _buildOrderSummary(charges),
                   ],
                 ),
               ),
-              _buildBottomBar(cart),
+              _buildBottomBar(charges['total']!),
             ],
           );
         },
@@ -155,10 +195,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       icon: const Icon(Icons.add),
                       label: const Text('Add New Address'),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
                         backgroundColor: Theme.of(context).primaryColor,
                         foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                       ),
                     ),
                   ],
@@ -168,33 +208,33 @@ class _CheckoutPageState extends State<CheckoutPage> {
               Column(
                 children: [
                   ...addressProvider.addresses.map((address) => Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: selectedAddress?.id == address.id
-                                ? Theme.of(context).primaryColor
-                                : Colors.grey.withOpacity(0.3),
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: RadioListTile<AddressModel>(
-                          value: address,
-                          groupValue: selectedAddress,
-                          title: Text(
-                            address.label ?? 'Address',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          subtitle: Text(
-                            '${address.street}, ${address.city}\n${address.state}, ${address.postalCode}',
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                          onChanged: (value) {
-                            setState(() => selectedAddress = value);
-                          },
-                          selected: selectedAddress?.id == address.id,
-                          activeColor: Theme.of(context).primaryColor,
-                        ),
-                      )),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: selectedAddress?.id == address.id
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey.withOpacity(0.3),
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: RadioListTile<AddressModel>(
+                      value: address,
+                      groupValue: selectedAddress,
+                      title: Text(
+                        address.label ?? 'Address',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(
+                        '${address.street}, ${address.city}\n${address.state}, ${address.postalCode}',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                      onChanged: (value) {
+                        setState(() => selectedAddress = value);
+                      },
+                      selected: selectedAddress?.id == address.id,
+                      activeColor: Theme.of(context).primaryColor,
+                    ),
+                  )),
                   TextButton.icon(
                     onPressed: () => Get.to(() => const AddressListPage()),
                     icon: const Icon(Icons.add),
@@ -260,7 +300,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildOrderSummary(CartModel cart) {
+  Widget _buildOrderSummary(Map<String, double> charges) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -283,18 +323,27 @@ class _CheckoutPageState extends State<CheckoutPage> {
               ],
             ),
             const SizedBox(height: 16),
-            _buildSummaryRow('Subtotal', cart.subtotal),
-            const SizedBox(height: 8),
-            _buildSummaryRow('Tax (13%)', cart.tax),
+            _buildSummaryRow('Subtotal', charges['subtotal']!),
+            if (widget.taxAndDeliverySettings.toggleServiceCharge) ...[
+              const SizedBox(height: 8),
+              _buildSummaryRow('Service Charge', charges['serviceCharge']!),
+            ],
+            if (widget.taxAndDeliverySettings.toggleDelivery) ...[
+              const SizedBox(height: 8),
+              _buildSummaryRow('Delivery Fee', charges['deliveryFee']!),
+            ],
+            if (widget.taxAndDeliverySettings.toggleTax) ...[
+              const SizedBox(height: 8),
+              _buildSummaryRow(
+                'Tax (${widget.taxAndDeliverySettings.taxPercentage}%)',
+                charges['tax']!,
+              ),
+            ],
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Divider(),
             ),
-            _buildSummaryRow(
-              'Total',
-              cart.total,
-              isTotal: true,
-            ),
+            _buildSummaryRow('Total', charges['total']!, isTotal: true),
           ],
         ),
       ),
@@ -324,7 +373,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildBottomBar(CartModel cart) {
+  Widget _buildBottomBar(double total) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -353,7 +402,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     ),
                   ),
                   Text(
-                    '\$${cart.total.toStringAsFixed(2)}',
+                    '\$${total.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -370,20 +419,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
                 child: isProcessing
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
                     : const Text(
-                        'Place Order',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  'Place Order',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
