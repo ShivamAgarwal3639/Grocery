@@ -7,6 +7,7 @@ import 'package:grocerry/models/product_model.dart';
 import 'package:grocerry/notifier/cart_notifier.dart';
 import 'package:grocerry/screens/product_detail_page.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 class CategoryItemsPage extends StatefulWidget {
   const CategoryItemsPage({super.key, required this.categoryId});
@@ -19,6 +20,48 @@ class CategoryItemsPage extends StatefulWidget {
 class _CategoryItemsPageState extends State<CategoryItemsPage> {
   final ProductService _productService = ProductService();
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  final _searchSubject = BehaviorSubject<String>();
+  List<ProductModel> _filteredProducts = [];
+  bool _isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupSearch();
+  }
+
+  void _setupSearch() {
+    _searchSubject.stream
+        .debounceTime(const Duration(milliseconds: 300))
+        .distinct()
+        .listen((query) {
+      setState(() => _isSearching = query.isNotEmpty);
+    });
+
+    _searchController.addListener(() {
+      _searchSubject.add(_searchController.text);
+    });
+  }
+
+  List<ProductModel> _filterProducts(List<ProductModel> products, String query) {
+    if (query.isEmpty) return products;
+
+    final searchLower = query.toLowerCase();
+    return products.where((product) {
+      return product.name.toLowerCase().contains(searchLower) ||
+          product.description.toLowerCase().contains(searchLower) ||
+          product.tags.any((tag) => tag.toLowerCase().contains(searchLower));
+    }).toList();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchSubject.close();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +80,11 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
             return _buildLoadingState();
           }
 
+          _filteredProducts = _filterProducts(
+            productsSnapshot.data!,
+            _searchController.text,
+          );
+
           return Consumer<CartNotifier>(
             builder: (context, cart, child) {
               return NestedScrollView(
@@ -44,11 +92,87 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
                 headerSliverBuilder: (context, innerBoxIsScrolled) => [
                   _buildAppBar(innerBoxIsScrolled),
                 ],
-                body: _buildProductGrid(productsSnapshot.data!, cart),
+                body: _filteredProducts.isEmpty && _isSearching
+                    ? _buildNoResultsFound()
+                    : _buildProductGrid(_filteredProducts, cart),
               );
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildNoResultsFound() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search_off,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No products found',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try different keywords',
+            style: TextStyle(
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  SliverAppBar _buildAppBar(bool innerBoxIsScrolled) {
+    return SliverAppBar(
+      floating: true,
+      pinned: true,
+      elevation: innerBoxIsScrolled ? 4 : 0,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      title: _isSearching
+          ? TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Search in ${widget.categoryId.name}...',
+          hintStyle: TextStyle(color: Colors.grey[600], fontSize: 16),
+          border: InputBorder.none,
+          suffixIcon: IconButton(
+            icon: Icon(Icons.clear, color: Colors.grey[600]),
+            onPressed: () {
+              _searchController.clear();
+              setState(() => _isSearching = false);
+            },
+          ),
+        ),
+      )
+          : Row(
+        children: [
+          Expanded(
+            child: Text(
+              widget.categoryId.name,
+              style: TextStyle(
+                color: Colors.grey[800],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            color: Colors.grey[800],
+            onPressed: () => setState(() => _isSearching = true),
+          ),
+        ],
       ),
     );
   }
@@ -86,26 +210,6 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[600],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  SliverAppBar _buildAppBar(bool innerBoxIsScrolled) {
-    return SliverAppBar(
-      floating: true,
-      pinned: true,
-      elevation: innerBoxIsScrolled ? 4 : 0,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      title: Row(
-        children: [
-          Text(
-            widget.categoryId.name,
-            style: TextStyle(
-              color: Colors.grey[800],
-              fontWeight: FontWeight.w600,
             ),
           ),
         ],
