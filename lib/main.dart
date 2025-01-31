@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
 import 'package:grocerry/notifier/address_provider.dart';
 import 'package:grocerry/notifier/cart_notifier.dart';
+import 'package:grocerry/utils/forced_up.dart';
 import 'package:provider/provider.dart';
 import 'notifier/auth_provider.dart';
 import 'screens/auth/login_screen.dart';
@@ -11,11 +12,15 @@ import 'screens/auth/home_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  final updateManager = UpdateManager();
+  await updateManager.initialize();
+
+  runApp(MyApp(updateManager: updateManager));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final UpdateManager updateManager;
+  const MyApp({super.key, required this.updateManager});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +46,12 @@ class MyApp extends StatelessWidget {
             behavior: SnackBarBehavior.floating,
           ),
         ),
-        home: AuthWrapper(),
+        home: Builder(
+          builder: (context) {
+            updateManager.shouldForceUpdate(context);
+            return AuthWrapper();
+          },
+        ),
       ),
     );
   }

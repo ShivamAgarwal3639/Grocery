@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:grocerry/firebase/tax_delivery_service.dart';
+import 'package:grocerry/models/tax_delivery_model.dart';
 import 'package:grocerry/models/user_model.dart';
 import 'package:grocerry/notifier/address_provider.dart';
 import 'package:provider/provider.dart';
@@ -28,17 +30,12 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
   // Map related variables
   GoogleMapController? _mapController;
   LatLng? _selectedLocation;
+  LatLng? _storeLocation;
+  double? _maxDeliveryDistance;
   Set<Marker> _markers = {};
-  Set<Polygon> _polygons = {};
+  Set<Circle> _circles = {};
   bool _isOutOfBounds = false;
 
-  // Bangalore boundary coordinates (approximate)
-  final LatLngBounds bangaloreBounds = LatLngBounds(
-    southwest: const LatLng(12.8642, 77.3789), // SW corner
-    northeast: const LatLng(13.1369, 77.7644), // NE corner
-  );
-
-  // Store address components
   String _city = '';
   String _state = '';
   String _country = '';
@@ -48,33 +45,75 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
   void initState() {
     super.initState();
     _labelController = TextEditingController(text: widget.address?.label ?? '');
-    _streetController =
-        TextEditingController(text: widget.address?.street ?? '');
-    _numberController =
-        TextEditingController(text: widget.address?.street ?? '');
+    _streetController = TextEditingController(text: widget.address?.street ?? '');
+    _numberController = TextEditingController(text: widget.address?.number ?? '');
     _isDefault = widget.address?.isDefault ?? false;
-    _initializeLocation();
-    _setupBangaloreBoundary();
+    _loadStoreLocation();
   }
 
-  void _setupBangaloreBoundary() {
-    // Create a polygon for Bangalore boundary
-    final List<LatLng> bangalorePoints = [
-      const LatLng(12.8642, 77.3789), // SW
-      const LatLng(13.1369, 77.3789), // NW
-      const LatLng(13.1369, 77.7644), // NE
-      const LatLng(12.8642, 77.7644), // SE
-    ];
+  Future<void> _loadStoreLocation() async {
+    try {
+      TaxAndDeliveryService taxAndDeliveryService = TaxAndDeliveryService();
+      TaxAndDeliveryModel? storeSettings =
+      await taxAndDeliveryService.getTaxAndDelivery('default');
 
-    _polygons.add(
-      Polygon(
-        polygonId: const PolygonId('bangalore_boundary'),
-        points: bangalorePoints,
-        strokeWidth: 2,
-        strokeColor: Colors.blue,
-        fillColor: Colors.blue.withOpacity(0.1),
-      ),
-    );
+      if (storeSettings != null &&
+          storeSettings.deliveryCordinate != null &&
+          storeSettings.deliveryDistance != null) {
+        setState(() {
+          _storeLocation = LatLng(
+            storeSettings.deliveryCordinate!['latitude']!,
+            storeSettings.deliveryCordinate!['longitude']!,
+          );
+          _maxDeliveryDistance = storeSettings.deliveryDistance;
+        });
+
+        _updateStoreMarkerAndCircle();
+        await _initializeLocation();
+      } else {
+        Get.snackbar(
+          'Error',
+          'Store location or delivery distance not set',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to load store location',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  void _updateStoreMarkerAndCircle() {
+    if (_storeLocation == null || _maxDeliveryDistance == null) return;
+
+    setState(() {
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('store_location'),
+          position: _storeLocation!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          infoWindow: const InfoWindow(title: 'Store Location'),
+        ),
+      );
+
+      _circles.add(
+        Circle(
+          circleId: const CircleId('delivery_radius'),
+          center: _storeLocation!,
+          radius: _maxDeliveryDistance! * 1000,
+          fillColor: Colors.blue.withOpacity(0.1),
+          strokeColor: Colors.blue,
+          strokeWidth: 1,
+        ),
+      );
+    });
   }
 
   Future<void> _initializeLocation() async {
@@ -89,14 +128,12 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
         }
 
         Position position = await Geolocator.getCurrentPosition();
+        final userLocation = LatLng(position.latitude, position.longitude);
 
-        // Check if current position is within Bangalore bounds
-        if (!_isLocationWithinBangalore(
-            LatLng(position.latitude, position.longitude))) {
-          // If not in Bangalore, use Bangalore center coordinates
+        if (!_isLocationWithinDeliveryRadius(userLocation)) {
           position = Position(
-            latitude: 12.9716,
-            longitude: 77.5946,
+            latitude: _storeLocation?.latitude ?? 12.9716,
+            longitude: _storeLocation?.longitude ?? 77.5946,
             timestamp: DateTime.now(),
             accuracy: 0,
             altitude: 0,
@@ -114,22 +151,36 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
         });
         _getAddressFromLatLng(_selectedLocation!);
       } catch (e) {
-        // Default to Bangalore center if permission denied
-        _selectedLocation = const LatLng(12.9716, 77.5946);
+        _selectedLocation = _storeLocation ?? const LatLng(12.9716, 77.5946);
         _updateMarker(_selectedLocation!);
       }
     }
   }
 
-  bool _isLocationWithinBangalore(LatLng position) {
-    return bangaloreBounds.contains(position);
+  bool _isLocationWithinDeliveryRadius(LatLng position) {
+    if (_storeLocation == null || _maxDeliveryDistance == null) return true;
+
+    final distanceInMeters = Geolocator.distanceBetween(
+      _storeLocation!.latitude,
+      _storeLocation!.longitude,
+      position.latitude,
+      position.longitude,
+    );
+
+    return distanceInMeters <= (_maxDeliveryDistance! * 1000);
   }
 
   void _updateMarker(LatLng position) {
-    final isWithinBounds = _isLocationWithinBangalore(position);
+    final isWithinRadius = _isLocationWithinDeliveryRadius(position);
+    final isValidLocation = isWithinRadius;
+
     setState(() {
-      _isOutOfBounds = !isWithinBounds;
-      _markers = {
+      _isOutOfBounds = !isValidLocation;
+
+      _markers.removeWhere(
+            (marker) => marker.markerId.value == 'selected_location',
+      );
+      _markers.add(
         Marker(
           markerId: const MarkerId('selected_location'),
           position: position,
@@ -138,14 +189,15 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
             setState(() => _isOutOfBounds = false);
           },
           onDragEnd: (newPosition) {
-            if (_isLocationWithinBangalore(newPosition)) {
+            final isValid = _isLocationWithinDeliveryRadius(newPosition);
+            if (isValid) {
               _getAddressFromLatLng(newPosition);
               setState(() => _isOutOfBounds = false);
             } else {
               setState(() => _isOutOfBounds = true);
               Get.snackbar(
-                'Out of Bounds',
-                'Please select a location within Bangalore city limits',
+                'Invalid Location',
+                'Please select a location within delivery radius',
                 snackPosition: SnackPosition.BOTTOM,
                 backgroundColor: Colors.red,
                 colorText: Colors.white,
@@ -153,17 +205,15 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
             }
           },
           icon: BitmapDescriptor.defaultMarkerWithHue(
-            isWithinBounds
-                ? BitmapDescriptor.hueRed
-                : BitmapDescriptor.hueAzure,
+            isValidLocation ? BitmapDescriptor.hueRed : BitmapDescriptor.hueAzure,
           ),
         ),
-      };
+      );
     });
   }
 
   Future<void> _getAddressFromLatLng(LatLng position) async {
-    if (!_isLocationWithinBangalore(position)) {
+    if (!_isLocationWithinDeliveryRadius(position)) {
       setState(() {
         _isOutOfBounds = true;
         _city = '';
@@ -171,7 +221,6 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
         _country = '';
         _postalCode = '';
         _streetController.text = '';
-        _numberController.text = '';
       });
       return;
     }
@@ -189,7 +238,6 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
           _state = place.administrativeArea ?? '';
           _country = place.country ?? '';
           _postalCode = place.postalCode ?? '';
-          // _streetController.text = place.street ?? '';
           _selectedLocation = position;
           _isOutOfBounds = false;
         });
@@ -204,6 +252,7 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -220,70 +269,59 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
       ),
       body: Column(
         children: [
-          // Fixed height map container
           Container(
             height: 300,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey[300]!),
             ),
-            child: _selectedLocation == null
+            child: _storeLocation == null
                 ? const Center(child: CircularProgressIndicator())
                 : GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: _selectedLocation!,
-                      zoom: 15,
-                    ),
-                    onMapCreated: (controller) {
-                      _mapController = controller;
-                      controller.setMapStyle(_mapStyle);
-                    },
-                    markers: _markers,
-                    polygons: _polygons,
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
-                    zoomControlsEnabled: true,
-                    mapToolbarEnabled: false,
-                    compassEnabled: true,
-                    onCameraMove: (position) {
-                      if (_markers.isNotEmpty) {
-                        _updateMarker(position.target);
-                      }
-                    },
-                    onCameraIdle: () {
-                      if (_markers.isNotEmpty && !_isOutOfBounds) {
-                        _getAddressFromLatLng(_markers.first.position);
-                      }
-                    },
-                    onTap: (position) {
-                      _updateMarker(position);
-                      _getAddressFromLatLng(position);
-                    },
-                  ),
+              initialCameraPosition: CameraPosition(
+                target: _selectedLocation ?? _storeLocation!,
+                zoom: 17, // Increased zoom level
+              ),
+              onMapCreated: (controller) {
+                _mapController = controller;
+                controller.setMapStyle(_mapStyle);
+              },
+              markers: _markers,
+              circles: _circles,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+              zoomControlsEnabled: true,
+              mapToolbarEnabled: false,
+              compassEnabled: true,
+              onCameraMove: (position) {
+                if (_markers.isNotEmpty) {
+                  _updateMarker(position.target);
+                }
+              },
+              onCameraIdle: () {
+                if (_markers.isNotEmpty && !_isOutOfBounds) {
+                  _getAddressFromLatLng(_markers.first.position);
+                }
+              },
+              onTap: (position) {
+                _updateMarker(position);
+                _getAddressFromLatLng(position);
+              },
+            ),
           ),
-
-          // Out of bounds warning
           if (_isOutOfBounds)
             Container(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.red,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Text(
-                'Please select a location within Bangalore city limits',
+                'Please select a location within delivery radius',
                 style: TextStyle(color: Colors.white),
                 textAlign: TextAlign.center,
               ),
             ),
-
-          // Scrollable form content
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -325,8 +363,6 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
                             ? 'Please enter phone number'
                             : null,
                       ),
-                      // const SizedBox(height: 16),
-                      // _buildAddressDetails(),
                       const SizedBox(height: 12),
                       _buildDefaultAddressSwitch(),
                       const SizedBox(height: 12),
@@ -343,7 +379,6 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
     );
   }
 
-  // Custom map style
   static const String _mapStyle = '''
     [
       {
