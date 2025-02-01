@@ -9,6 +9,7 @@ class TaxAndDeliveryModel {
   final double serviceChargeAmount;
   final Map<String, double>? deliveryCordinate;
   final double? deliveryDistance;
+  final String? whatsappNumber; // Add new field
 
   TaxAndDeliveryModel({
     required this.id,
@@ -21,6 +22,7 @@ class TaxAndDeliveryModel {
     this.serviceChargeAmount = 0.0,
     this.deliveryCordinate,
     this.deliveryDistance,
+    this.whatsappNumber, // Add to constructor
   });
 
   factory TaxAndDeliveryModel.fromMap(Map<String, dynamic> map) {
@@ -38,6 +40,7 @@ class TaxAndDeliveryModel {
           ? Map<String, double>.from(map['deliveryCordinate'])
           : null,
       deliveryDistance: map['deliveryDistance']?.toDouble(),
+      whatsappNumber: map['whatsappNumber']?.toString(),
     );
   }
 
@@ -54,6 +57,7 @@ class TaxAndDeliveryModel {
       'serviceChargeAmount': serviceChargeAmount,
       'deliveryCordinate': deliveryCordinate,
       'deliveryDistance': deliveryDistance,
+      'whatsappNumber': whatsappNumber,
     };
   }
 
@@ -68,6 +72,7 @@ class TaxAndDeliveryModel {
     double? serviceChargeAmount,
     Map<String, double>? deliveryCordinate,
     double? deliveryDistance,
+    String? whatsappNumber, // Add to copyWith
   }) {
     return TaxAndDeliveryModel(
       id: id ?? this.id,
@@ -82,6 +87,7 @@ class TaxAndDeliveryModel {
       serviceChargeAmount: serviceChargeAmount ?? this.serviceChargeAmount,
       deliveryCordinate: deliveryCordinate ?? this.deliveryCordinate,
       deliveryDistance: deliveryDistance ?? this.deliveryDistance,
+      whatsappNumber: whatsappNumber ?? this.whatsappNumber,
     );
   }
 }

@@ -1,8 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:grocerry/firebase/tax_delivery_service.dart';
+import 'package:grocerry/models/tax_delivery_model.dart';
 import 'package:intl/intl.dart';
 import 'package:grocerry/models/cart_model.dart';
 import 'package:grocerry/models/order_model.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OrderDetailsPage extends StatelessWidget {
   final OrderModel order;
@@ -178,7 +182,8 @@ class OrderDetailsPage extends StatelessWidget {
                         ),
                         errorWidget: (context, url, error) => Container(
                           color: Colors.grey[200],
-                          child: Icon(Icons.error_outline, color: Colors.grey[400]),
+                          child: Icon(Icons.error_outline,
+                              color: Colors.grey[400]),
                         ),
                       ),
                     ),
@@ -238,7 +243,8 @@ class OrderDetailsPage extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.location_on_outlined, size: 18, color: Colors.grey[700]),
+                Icon(Icons.location_on_outlined,
+                    size: 18, color: Colors.grey[700]),
                 const SizedBox(width: 8),
                 const Text(
                   'Delivery Address',
@@ -453,7 +459,7 @@ class OrderDetailsPage extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Add contact support logic
+                  _launchWhatsAppSupport();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[700],
@@ -476,6 +482,53 @@ class OrderDetailsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _launchWhatsAppSupport() async {
+    TaxAndDeliveryService taxAndDeliveryService = TaxAndDeliveryService();
+    TaxAndDeliveryModel? taxAndDeliveryModel =
+        await taxAndDeliveryService.getTaxAndDelivery("default");
+    final whatsappNumber = taxAndDeliveryModel?.whatsappNumber;
+    if (whatsappNumber == null || whatsappNumber.isEmpty) {
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        const SnackBar(content: Text('WhatsApp support number not configured')),
+      );
+      return;
+    }
+// Update the message in _launchWhatsAppSupport method
+    final message = '''
+*Order Support Request* (#${order.id.substring(0, 8)})
+
+📦 *Order Details*
+Total Items: ${order.items.fold(0, (sum, item) => sum + item.quantity)}
+Total Amount: \$${order.total.toStringAsFixed(2)}
+
+🛒 *Items*
+${order.items.map((item) => '• ${item.product.name} (${item.quantity}x) - \$${(item.price * item.quantity).toStringAsFixed(2)}').join('\n')}
+
+🏠 *Delivery Address*
+${order.shippingAddress.street}, 
+${order.shippingAddress.city}, 
+${order.shippingAddress.country}
+
+Please assist with this order inquiry.''';
+
+    final encodedMessage = Uri.encodeComponent(message);
+    final url = 'https://wa.me/$whatsappNumber?text=$encodedMessage';
+
+    try {
+      if (await canLaunchUrl(Uri.parse(url))) {
+        await launchUrl(Uri.parse(url));
+      } else {
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          const SnackBar(content: Text('Could not launch WhatsApp')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
   }
 }
 
