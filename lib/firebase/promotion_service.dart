@@ -9,7 +9,7 @@ class PromotionService {
   Stream<List<PromotionModel>> getActivePromotions() {
     return _firestore
         .collection(_collection)
-        .where('isActive', isEqualTo: true)
+    // .where('isActive', isEqualTo: true)
         .where('endDate', isGreaterThan: Timestamp.fromDate(DateTime.now()))
         .orderBy('endDate')
         .orderBy('displayOrder')

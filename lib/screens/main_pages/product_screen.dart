@@ -277,28 +277,23 @@ class _ProductsPageState extends State<ProductsPage> {
                 return Builder(
                   builder: (BuildContext context) {
                     return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                      height: 180,
+                      width: MediaQuery.of(context).size.width -
+                          (MediaQuery.of(context).size.width / 5),
+                      margin: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
                             promotion.getColor1(),
-                            promotion.getColor2(),
+                            promotion.getColor2()
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: promotion.getColor1().withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Stack(
                         children: [
-                          // Background circle decoration
                           Positioned(
                             right: -30,
                             bottom: -30,
@@ -307,85 +302,89 @@ class _ProductsPageState extends State<ProductsPage> {
                               backgroundColor: Colors.white.withOpacity(0.1),
                             ),
                           ),
-                          // Main content
                           Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Row(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      // Discount badge
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Text(
+                                        promotion.discount,
+                                        style: TextStyle(
+                                          color: promotion.getColor1(),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    if (promotion.isCoupon) ...[
+                                      const SizedBox(width: 8),
                                       Container(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 12,
                                           vertical: 6,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: Colors.white.withOpacity(0.2),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
                                         child: Text(
-                                          promotion.discount,
+                                          'COUPON',
                                           style: TextStyle(
-                                            color: promotion.getColor1(),
+                                            color: Colors.white,
                                             fontWeight: FontWeight.bold,
+                                            fontSize: 12,
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(height: 12),
-                                      // Title
-                                      Text(
-                                        promotion.title,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      // Subtitle
-                                      Text(
-                                        promotion.subtitle,
-                                        style: TextStyle(
-                                          color: Colors.white.withOpacity(0.9),
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      // Date indicator
-                                      if (DateTime.now().isAfter(promotion
-                                          .endDate
-                                          .subtract(const Duration(days: 2))))
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 8),
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  Colors.black.withOpacity(0.2),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            child: Text(
-                                              'Ends ${_formatEndDate(promotion.endDate)}',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
                                     ],
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                if (promotion.title != "")
+                                  Text(
+                                    promotion.title,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                if (promotion.subtitle != "")
+                                  Text(
+                                    promotion.subtitle,
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.9),
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                const Spacer(),
+                                if (promotion.isCoupon)
+                                  Text(
+                                    promotion.discountType == 'PERCENTAGE'
+                                        ? '${promotion.discountValue}% off on min. order of ₹${promotion.minOrderValue}${promotion.maxDiscountAmount > 0 ? ' | Max discount: ₹${promotion.maxDiscountAmount}' : ''}'
+                                        : 'Flat ₹${promotion.discountValue} off on min. order of ₹${promotion.minOrderValue}',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.9),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Valid until ${DateFormat('MMM d, y').format(promotion.endDate)}',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 12,
                                   ),
                                 ),
                               ],

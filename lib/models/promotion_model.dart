@@ -13,6 +13,12 @@ class PromotionModel {
   final DateTime startDate;
   final DateTime endDate;
   final int displayOrder;
+  // New fields
+  final bool isCoupon; // true for discount coupon, false for promotional banner
+  final String discountType; // 'PERCENTAGE' or 'FLAT'
+  final double discountValue; // Percentage or flat amount
+  final double minOrderValue; // Minimum cart value required
+  final double maxDiscountAmount; // Maximum discount limit (for percentage discounts)
 
   PromotionModel({
     required this.id,
@@ -26,6 +32,11 @@ class PromotionModel {
     required this.startDate,
     required this.endDate,
     required this.displayOrder,
+    required this.isCoupon,
+    required this.discountType,
+    required this.discountValue,
+    required this.minOrderValue,
+    required this.maxDiscountAmount,
   });
 
   // Convert Firestore data to PromotionModel
@@ -42,6 +53,11 @@ class PromotionModel {
       startDate: (data['startDate'] as Timestamp).toDate(),
       endDate: (data['endDate'] as Timestamp).toDate(),
       displayOrder: data['displayOrder'] ?? 0,
+      isCoupon: data['isCoupon'] ?? false,
+      discountType: data['discountType'] ?? 'PERCENTAGE',
+      discountValue: (data['discountValue'] ?? 0).toDouble(),
+      minOrderValue: (data['minOrderValue'] ?? 0).toDouble(),
+      maxDiscountAmount: (data['maxDiscountAmount'] ?? 0).toDouble(),
     );
   }
 
@@ -58,10 +74,34 @@ class PromotionModel {
       'startDate': Timestamp.fromDate(startDate),
       'endDate': Timestamp.fromDate(endDate),
       'displayOrder': displayOrder,
+      'isCoupon': isCoupon,
+      'discountType': discountType,
+      'discountValue': discountValue,
+      'minOrderValue': minOrderValue,
+      'maxDiscountAmount': maxDiscountAmount,
     };
   }
 
-  // Convert hex color string to Color object
+  // Calculate discount amount for a given cart value
+  double calculateDiscount(double cartValue) {
+    if (!isCoupon || cartValue < minOrderValue) {
+      return 0;
+    }
+
+    double calculatedDiscount;
+    if (discountType == 'PERCENTAGE') {
+      calculatedDiscount = (cartValue * discountValue) / 100;
+      if (maxDiscountAmount > 0 && calculatedDiscount > maxDiscountAmount) {
+        calculatedDiscount = maxDiscountAmount;
+      }
+    } else { // FLAT
+      calculatedDiscount = discountValue;
+    }
+
+    return calculatedDiscount;
+  }
+
+  // Existing color conversion methods
   Color getColor1() {
     return Color(int.parse(color1.replaceAll('#', '0xFF')));
   }
