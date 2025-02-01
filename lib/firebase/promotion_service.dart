@@ -9,14 +9,14 @@ class PromotionService {
   Stream<List<PromotionModel>> getActivePromotions() {
     return _firestore
         .collection(_collection)
-    // .where('isActive', isEqualTo: true)
+        // .where('isActive', isEqualTo: true)
         .where('endDate', isGreaterThan: Timestamp.fromDate(DateTime.now()))
         .orderBy('endDate')
         .orderBy('displayOrder')
         .snapshots()
         .map((snapshot) => snapshot.docs
-        .map((doc) => PromotionModel.fromFirestore(doc.data(), doc.id))
-        .toList());
+            .map((doc) => PromotionModel.fromFirestore(doc.data()))
+            .toList());
   }
 
   // Add a new promotion
@@ -40,9 +40,7 @@ class PromotionService {
   // Get a single promotion by ID
   Stream<PromotionModel?> getPromotionById(String id) {
     return _firestore.collection(_collection).doc(id).snapshots().map(
-            (doc) => doc.exists
-            ? PromotionModel.fromFirestore(doc.data()!, doc.id)
-            : null);
+        (doc) => doc.exists ? PromotionModel.fromFirestore(doc.data()!) : null);
   }
 
   // Get promotions by category
@@ -56,8 +54,8 @@ class PromotionService {
         .orderBy('displayOrder')
         .snapshots()
         .map((snapshot) => snapshot.docs
-        .map((doc) => PromotionModel.fromFirestore(doc.data(), doc.id))
-        .toList());
+            .map((doc) => PromotionModel.fromFirestore(doc.data()))
+            .toList());
   }
 
   // Toggle promotion active status

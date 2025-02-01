@@ -322,6 +322,10 @@ class OrderDetailsPage extends StatelessWidget {
                 order.tax,
               ),
             ],
+            if (order.appliedPromotion != null) ...[
+              const SizedBox(height: 8),
+              _buildPromotionRow(),
+            ],
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Divider(height: 1),
@@ -330,6 +334,57 @@ class OrderDetailsPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPromotionRow() {
+    final promotion = order.appliedPromotion!;
+    final discountText = promotion.discountType == 'PERCENTAGE'
+        ? '${promotion.discountValue}% OFF'
+        : '\$${promotion.discountValue} OFF';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.local_offer_outlined,
+                  size: 16,
+                  color: Colors.green[700],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Discount Applied',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              '-\$${order.discountAmount.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.green[700],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${promotion.title} ($discountText)',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
     );
   }
 

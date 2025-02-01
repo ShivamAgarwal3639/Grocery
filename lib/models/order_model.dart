@@ -1,4 +1,5 @@
 import 'package:grocerry/models/cart_model.dart';
+import 'package:grocerry/models/promotion_model.dart';
 import 'package:grocerry/models/user_model.dart';
 import 'package:grocerry/models/tax_delivery_model.dart';
 
@@ -19,6 +20,9 @@ class OrderModel {
   final DateTime updatedAt;
   final String? notes;
   final TaxAndDeliveryModel taxAndDeliverySettings;
+  // New fields for promotion
+  final PromotionModel? appliedPromotion;
+  final double discountAmount;
 
   OrderModel({
     required this.id,
@@ -37,6 +41,8 @@ class OrderModel {
     required this.updatedAt,
     this.notes,
     required this.taxAndDeliverySettings,
+    this.appliedPromotion,
+    this.discountAmount = 0.0,
   });
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
@@ -53,9 +59,9 @@ class OrderModel {
       total: (map['total'] as num?)?.toDouble() ?? 0.0,
       status: map['status'] != null
           ? OrderStatus.values.firstWhere(
-            (e) => e.toString() == 'OrderStatus.${map['status']}',
-        orElse: () => OrderStatus.pending,
-      )
+              (e) => e.toString() == 'OrderStatus.${map['status']}',
+              orElse: () => OrderStatus.pending,
+            )
           : OrderStatus.pending,
       shippingAddress: AddressModel.fromMap(map['shippingAddress'] ?? {}),
       billingAddress: map['billingAddress'] != null
@@ -69,8 +75,12 @@ class OrderModel {
           ? DateTime.parse(map['updatedAt'].toString())
           : DateTime.now(),
       notes: map['notes']?.toString(),
-      taxAndDeliverySettings: TaxAndDeliveryModel.fromMap(
-          map['taxAndDeliverySettings'] ?? {}),
+      taxAndDeliverySettings:
+          TaxAndDeliveryModel.fromMap(map['taxAndDeliverySettings'] ?? {}),
+      appliedPromotion: map['appliedPromotion'] != null
+          ? PromotionModel.fromFirestore(map['appliedPromotion'])
+          : null,
+      discountAmount: (map['discountAmount'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -92,6 +102,8 @@ class OrderModel {
       'updatedAt': updatedAt.toIso8601String(),
       'notes': notes,
       'taxAndDeliverySettings': taxAndDeliverySettings.toMap(),
+      'appliedPromotion': appliedPromotion?.toFirestore(),
+      'discountAmount': discountAmount,
     };
   }
 }

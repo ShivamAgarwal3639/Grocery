@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:grocerry/firebase/order_service.dart';
 import 'package:grocerry/models/cart_model.dart';
 import 'package:grocerry/models/order_model.dart';
+import 'package:grocerry/models/promotion_model.dart';
 import 'package:grocerry/models/user_model.dart';
 import 'package:grocerry/models/tax_delivery_model.dart';
 import 'package:grocerry/notifier/address_provider.dart';
@@ -14,10 +15,14 @@ import 'package:uuid/uuid.dart';
 
 class CheckoutPage extends StatefulWidget {
   final TaxAndDeliveryModel taxAndDeliverySettings;
+  final PromotionModel? appliedPromotion;
+  final double discountAmount;
 
   const CheckoutPage({
     super.key,
     required this.taxAndDeliverySettings,
+    this.appliedPromotion,
+    this.discountAmount = 0.0,
   });
 
   @override
@@ -28,7 +33,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   AddressModel? selectedAddress;
   bool isProcessing = false;
 
-  // Calculate charges based on current settings
+  // Calculate charges based on current settings and applied promotion
   Map<String, double> calculateCharges(CartModel cart) {
     double subtotal = cart.subtotal;
     double serviceCharge = widget.taxAndDeliverySettings.toggleServiceCharge
@@ -36,8 +41,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
         : 0.0;
 
     double deliveryFee = widget.taxAndDeliverySettings.toggleDelivery &&
-        (widget.taxAndDeliverySettings.deliveryFeeNotApplyIfCartValueGreaterThan == null ||
-            subtotal < widget.taxAndDeliverySettings.deliveryFeeNotApplyIfCartValueGreaterThan!)
+            (widget.taxAndDeliverySettings
+                        .deliveryFeeNotApplyIfCartValueGreaterThan ==
+                    null ||
+                subtotal <
+                    widget.taxAndDeliverySettings
+                        .deliveryFeeNotApplyIfCartValueGreaterThan!)
         ? widget.taxAndDeliverySettings.deliveryFee
         : 0.0;
 
@@ -46,13 +55,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
         ? taxableAmount * (widget.taxAndDeliverySettings.taxPercentage / 100)
         : 0.0;
 
-    double total = subtotal + serviceCharge + deliveryFee + tax;
+    double total =
+        subtotal + serviceCharge + deliveryFee + tax - widget.discountAmount;
 
     return {
       'subtotal': subtotal,
       'serviceCharge': serviceCharge,
       'deliveryFee': deliveryFee,
       'tax': tax,
+      'discount': widget.discountAmount,
       'total': total,
     };
   }
@@ -91,6 +102,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         taxAndDeliverySettings: widget.taxAndDeliverySettings,
+        appliedPromotion: widget.appliedPromotion,
+        discountAmount: widget.discountAmount,
       );
 
       final orderService = OrderService();
@@ -119,6 +132,101 @@ class _CheckoutPageState extends State<CheckoutPage> {
     } finally {
       setState(() => isProcessing = false);
     }
+  }
+
+  Widget _buildOrderSummary(Map<String, double> charges) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.receipt, color: Colors.green),
+                const SizedBox(width: 8),
+                const Text(
+                  'Order Summary',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildSummaryRow('Subtotal', charges['subtotal']!),
+            if (widget.taxAndDeliverySettings.toggleServiceCharge) ...[
+              const SizedBox(height: 8),
+              _buildSummaryRow('Service Charge', charges['serviceCharge']!),
+            ],
+            if (widget.taxAndDeliverySettings.toggleDelivery) ...[
+              const SizedBox(height: 8),
+              _buildSummaryRow('Delivery Fee', charges['deliveryFee']!),
+            ],
+            if (widget.taxAndDeliverySettings.toggleTax) ...[
+              const SizedBox(height: 8),
+              _buildSummaryRow(
+                'Tax (${widget.taxAndDeliverySettings.taxPercentage}%)',
+                charges['tax']!,
+              ),
+            ],
+            if (widget.discountAmount > 0) ...[
+              const SizedBox(height: 8),
+              _buildSummaryRow('Discount', charges['discount']!,
+                  isDiscount: true),
+              if (widget.appliedPromotion != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Applied coupon: ${widget.appliedPromotion!.title}',
+                  style: TextStyle(
+                    color: Colors.green[700],
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ],
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(),
+            ),
+            _buildSummaryRow('Total', charges['total']!, isTotal: true),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, double amount,
+      {bool isTotal = false, bool isDiscount = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            fontSize: isTotal ? 16 : 14,
+          ),
+        ),
+        Text(
+          isDiscount
+              ? '-\$${amount.toStringAsFixed(2)}'
+              : '\$${amount.toStringAsFixed(2)}',
+          style: TextStyle(
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            fontSize: isTotal ? 16 : 14,
+            color: isDiscount
+                ? Colors.green[700]
+                : isTotal
+                    ? Theme.of(context).primaryColor
+                    : null,
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -208,33 +316,33 @@ class _CheckoutPageState extends State<CheckoutPage> {
               Column(
                 children: [
                   ...addressProvider.addresses.map((address) => Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: selectedAddress?.id == address.id
-                            ? Theme.of(context).primaryColor
-                            : Colors.grey.withOpacity(0.3),
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: RadioListTile<AddressModel>(
-                      value: address,
-                      groupValue: selectedAddress,
-                      title: Text(
-                        address.label ?? 'Address',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(
-                        '${address.street}, ${address.city}\n${address.state}, ${address.postalCode}',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                      onChanged: (value) {
-                        setState(() => selectedAddress = value);
-                      },
-                      selected: selectedAddress?.id == address.id,
-                      activeColor: Theme.of(context).primaryColor,
-                    ),
-                  )),
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: selectedAddress?.id == address.id
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey.withOpacity(0.3),
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: RadioListTile<AddressModel>(
+                          value: address,
+                          groupValue: selectedAddress,
+                          title: Text(
+                            address.label ?? 'Address',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Text(
+                            '${address.street}, ${address.city}\n${address.state}, ${address.postalCode}',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                          onChanged: (value) {
+                            setState(() => selectedAddress = value);
+                          },
+                          selected: selectedAddress?.id == address.id,
+                          activeColor: Theme.of(context).primaryColor,
+                        ),
+                      )),
                   TextButton.icon(
                     onPressed: () => Get.to(() => const AddressListPage()),
                     icon: const Icon(Icons.add),
@@ -300,79 +408,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildOrderSummary(Map<String, double> charges) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.receipt, color: Colors.green),
-                const SizedBox(width: 8),
-                const Text(
-                  'Order Summary',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildSummaryRow('Subtotal', charges['subtotal']!),
-            if (widget.taxAndDeliverySettings.toggleServiceCharge) ...[
-              const SizedBox(height: 8),
-              _buildSummaryRow('Service Charge', charges['serviceCharge']!),
-            ],
-            if (widget.taxAndDeliverySettings.toggleDelivery) ...[
-              const SizedBox(height: 8),
-              _buildSummaryRow('Delivery Fee', charges['deliveryFee']!),
-            ],
-            if (widget.taxAndDeliverySettings.toggleTax) ...[
-              const SizedBox(height: 8),
-              _buildSummaryRow(
-                'Tax (${widget.taxAndDeliverySettings.taxPercentage}%)',
-                charges['tax']!,
-              ),
-            ],
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(),
-            ),
-            _buildSummaryRow('Total', charges['total']!, isTotal: true),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSummaryRow(String label, double amount, {bool isTotal = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            fontSize: isTotal ? 16 : 14,
-          ),
-        ),
-        Text(
-          '\$${amount.toStringAsFixed(2)}',
-          style: TextStyle(
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            fontSize: isTotal ? 16 : 14,
-            color: isTotal ? Theme.of(context).primaryColor : null,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildBottomBar(double total) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -419,20 +454,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
                 child: isProcessing
                     ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
                     : const Text(
-                  'Place Order',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                        'Place Order',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ),
           ],

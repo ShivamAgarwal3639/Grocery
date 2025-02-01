@@ -18,7 +18,8 @@ class PromotionModel {
   final String discountType; // 'PERCENTAGE' or 'FLAT'
   final double discountValue; // Percentage or flat amount
   final double minOrderValue; // Minimum cart value required
-  final double maxDiscountAmount; // Maximum discount limit (for percentage discounts)
+  final double
+      maxDiscountAmount; // Maximum discount limit (for percentage discounts)
 
   PromotionModel({
     required this.id,
@@ -40,9 +41,9 @@ class PromotionModel {
   });
 
   // Convert Firestore data to PromotionModel
-  factory PromotionModel.fromFirestore(Map<String, dynamic> data, String id) {
+  factory PromotionModel.fromFirestore(Map<String, dynamic> data) {
     return PromotionModel(
-      id: id,
+      id: data['id'] ?? "",
       discount: data['discount'] ?? '',
       title: data['title'] ?? '',
       subtitle: data['subtitle'] ?? '',
@@ -64,6 +65,7 @@ class PromotionModel {
   // Convert PromotionModel to Firestore data
   Map<String, dynamic> toFirestore() {
     return {
+      "id":id,
       'discount': discount,
       'title': title,
       'subtitle': subtitle,
@@ -94,7 +96,8 @@ class PromotionModel {
       if (maxDiscountAmount > 0 && calculatedDiscount > maxDiscountAmount) {
         calculatedDiscount = maxDiscountAmount;
       }
-    } else { // FLAT
+    } else {
+      // FLAT
       calculatedDiscount = discountValue;
     }
 

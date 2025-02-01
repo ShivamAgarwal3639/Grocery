@@ -257,7 +257,7 @@ class _ProductsPageState extends State<ProductsPage> {
         final promotions = snapshot.data!;
 
         if (promotions.isEmpty) {
-          return const SizedBox.shrink(); // Hide carousel when no promotions
+          return const SizedBox.shrink();
         }
 
         return Column(
@@ -279,8 +279,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     return Container(
                       height: 180,
                       width: MediaQuery.of(context).size.width -
-                          (MediaQuery.of(context).size.width / 5),
-                      margin: const EdgeInsets.all(16),
+                          (MediaQuery.of(context).size.width / 10),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -304,90 +303,107 @@ class _ProductsPageState extends State<ProductsPage> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        promotion.discount,
-                                        style: TextStyle(
-                                          color: promotion.getColor1(),
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    if (promotion.isCoupon) ...[
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.2),
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
-                                        child: Text(
-                                          'COUPON',
-                                          style: TextStyle(
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
                                             color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: Text(
+                                            promotion.discount,
+                                            style: TextStyle(
+                                              color: promotion.getColor1(),
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ),
+                                        if (promotion.isCoupon) ...[
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.white.withOpacity(0.2),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: const Text(
+                                              'COUPON',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    if (promotion.title.isNotEmpty)
+                                      Flexible(
+                                        child: Text(
+                                          promotion.title,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
-                                    ],
+                                    if (promotion.subtitle.isNotEmpty)
+                                      Flexible(
+                                        child: Text(
+                                          promotion.subtitle,
+                                          style: TextStyle(
+                                            color:
+                                                Colors.white.withOpacity(0.9),
+                                            fontSize: 16,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    const Spacer(),
+                                    if (promotion.isCoupon)
+                                      Flexible(
+                                        child: Text(
+                                          promotion.discountType == 'PERCENTAGE'
+                                              ? '${promotion.discountValue}% off on min. order of ₹${promotion.minOrderValue}${promotion.maxDiscountAmount > 0 ? ' | Max discount: ₹${promotion.maxDiscountAmount}' : ''}'
+                                              : 'Flat ₹${promotion.discountValue} off on min. order of ₹${promotion.minOrderValue}',
+                                          style: TextStyle(
+                                            color:
+                                                Colors.white.withOpacity(0.9),
+                                            fontSize: 14,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Valid until ${DateFormat('MMM d, y').format(promotion.endDate)}',
+                                      style: TextStyle(
+                                        color: Colors.white.withOpacity(0.8),
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ],
-                                ),
-                                const SizedBox(height: 4),
-                                if (promotion.title != "")
-                                  Text(
-                                    promotion.title,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                if (promotion.subtitle != "")
-                                  Text(
-                                    promotion.subtitle,
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.9),
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                const Spacer(),
-                                if (promotion.isCoupon)
-                                  Text(
-                                    promotion.discountType == 'PERCENTAGE'
-                                        ? '${promotion.discountValue}% off on min. order of ₹${promotion.minOrderValue}${promotion.maxDiscountAmount > 0 ? ' | Max discount: ₹${promotion.maxDiscountAmount}' : ''}'
-                                        : 'Flat ₹${promotion.discountValue} off on min. order of ₹${promotion.minOrderValue}',
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.9),
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Valid until ${DateFormat('MMM d, y').format(promotion.endDate)}',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+                                );
+                              },
                             ),
                           ),
                         ],
@@ -398,7 +414,6 @@ class _ProductsPageState extends State<ProductsPage> {
               }).toList(),
             ),
             const SizedBox(height: 12),
-            // Carousel indicators
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: promotions.asMap().entries.map((entry) {
