@@ -5,6 +5,7 @@ import 'package:grocerry/firebase/tax_delivery_service.dart';
 import 'package:grocerry/models/cart_model.dart';
 import 'package:grocerry/models/promotion_model.dart';
 import 'package:grocerry/models/tax_delivery_model.dart';
+import 'package:grocerry/notifier/address_provider.dart';
 import 'package:grocerry/notifier/cart_notifier.dart';
 import 'package:grocerry/screens/checkout_page.dart';
 import 'package:provider/provider.dart';
@@ -117,61 +118,64 @@ class _CartPageState extends State<CartPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CartNotifier>(
-      builder: (context, cartNotifier, child) {
-        return FutureBuilder<TaxAndDeliveryModel?>(
-          future: _loadTaxSettings(context),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    return ChangeNotifierProvider(
+      create: (context) => AddressProvider(),
+      child: Consumer<CartNotifier>(
+        builder: (context, cartNotifier, child) {
+          return FutureBuilder<TaxAndDeliveryModel?>(
+            future: _loadTaxSettings(context),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            final cart = cartNotifier.cart;
-            final settings =
-                snapshot.data ?? TaxAndDeliveryModel(id: 'default');
-            final total = calculateCharges(cart, settings);
+              final cart = cartNotifier.cart;
+              final settings =
+                  snapshot.data ?? TaxAndDeliveryModel(id: 'default');
+              final total = calculateCharges(cart, settings);
 
-            return Scaffold(
-              backgroundColor: Colors.grey[50],
-              appBar: AppBar(
-                title: Text(
-                  'My Cart (${cart.items.length})',
-                  style: const TextStyle(fontSize: 18),
+              return Scaffold(
+                backgroundColor: Colors.grey[50],
+                appBar: AppBar(
+                  title: Text(
+                    'My Cart (${cart.items.length})',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  centerTitle: true,
+                  elevation: 0,
+                  backgroundColor: Colors.white,
                 ),
-                centerTitle: true,
-                elevation: 0,
-                backgroundColor: Colors.white,
-              ),
-              body: cart.items.isEmpty
-                  ? _buildEmptyCart(context)
-                  : Column(
-                      children: [
-                        _buildCouponSection(cart),
-                        Expanded(
-                          child: ListView.separated(
-                            padding: const EdgeInsets.all(16),
-                            itemCount: cart.items.length,
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(height: 8),
-                            itemBuilder: (context, index) => _buildCartItem(
-                              context,
-                              cart.items[index],
-                              cartNotifier,
+                body: cart.items.isEmpty
+                    ? _buildEmptyCart(context)
+                    : Column(
+                        children: [
+                          _buildCouponSection(cart),
+                          Expanded(
+                            child: ListView.separated(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: cart.items.length,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: 8),
+                              itemBuilder: (context, index) => _buildCartItem(
+                                context,
+                                cart.items[index],
+                                cartNotifier,
+                              ),
                             ),
                           ),
-                        ),
-                        _buildCheckoutSection(
-                          context,
-                          cart,
-                          settings,
-                          total,
-                        ),
-                      ],
-                    ),
-            );
-          },
-        );
-      },
+                          _buildCheckoutSection(
+                            context,
+                            cart,
+                            settings,
+                            total,
+                          ),
+                        ],
+                      ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:grocerry/firebase/order_service.dart';
+import 'package:grocerry/firebase/user_service.dart';
 import 'package:grocerry/models/cart_model.dart';
 import 'package:grocerry/models/order_model.dart';
 import 'package:grocerry/models/promotion_model.dart';
@@ -32,6 +33,23 @@ class CheckoutPage extends StatefulWidget {
 class _CheckoutPageState extends State<CheckoutPage> {
   AddressModel? selectedAddress;
   bool isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserAddresses();
+  }
+
+  void _loadUserAddresses() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Use a post-frame callback to ensure context is available
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<AddressProvider>(context, listen: false)
+            .loadAddresses(user.uid);
+      });
+    }
+  }
 
   // Calculate charges based on current settings and applied promotion
   Map<String, double> calculateCharges(CartModel cart) {
@@ -265,6 +283,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildAddressSection(AddressProvider addressProvider) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Center(child: Text('Please log in to manage addresses'));
+    }
+
+    if (addressProvider.isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (addressProvider.error != null) {
+      return Center(child: Text('Error: ${addressProvider.error}'));
+    }
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
