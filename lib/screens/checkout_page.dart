@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:grocerry/firebase/order_service.dart';
 import 'package:grocerry/models/cart_model.dart';
 import 'package:grocerry/models/order_model.dart';
-import 'package:grocerry/models/promotion_model.dart';
 import 'package:grocerry/models/user_model.dart';
 import 'package:grocerry/models/tax_delivery_model.dart';
 import 'package:grocerry/notifier/address_provider.dart';
@@ -15,12 +14,10 @@ import 'package:uuid/uuid.dart';
 
 class CheckoutPage extends StatefulWidget {
   final TaxAndDeliveryModel taxAndDeliverySettings;
-  final PromotionModel? appliedPromotion;
 
   const CheckoutPage({
     super.key,
     required this.taxAndDeliverySettings,
-    this.appliedPromotion,
   });
 
   @override
@@ -74,20 +71,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
     setState(() => isProcessing = true);
 
     try {
-
-
-
-
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception('User not authenticated');
-
 
       final cartNotifier = Provider.of<CartNotifier>(context, listen: false);
       final cart = cartNotifier.cart;
       final charges = calculateCharges(cart);
-
-      double discountAmount = widget.appliedPromotion?.calculateDiscount(cart.subtotal) ?? 0.0;
-      double finalTotal = charges['total']! - discountAmount;
 
       final order = OrderModel(
         id: const Uuid().v4(),
@@ -102,11 +91,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         taxAndDeliverySettings: widget.taxAndDeliverySettings,
-        appliedPromotionId: widget.appliedPromotion?.id,
-        promotionTitle: widget.appliedPromotion?.title,
-        discountAmount: discountAmount,
       );
-
 
       final orderService = OrderService();
       await orderService.createOrder(order);
