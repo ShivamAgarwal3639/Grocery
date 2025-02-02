@@ -67,6 +67,8 @@ class UserModel {
   final List<AddressModel> addresses;
   final DateTime createdAt;
   final bool isActive;
+  final String? admin;
+  final String? fcmTokens;
 
   UserModel({
     required this.id,
@@ -77,6 +79,8 @@ class UserModel {
     this.addresses = const [],
     required this.createdAt,
     this.isActive = true,
+    this.admin,
+    this.fcmTokens,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
@@ -93,6 +97,8 @@ class UserModel {
           ? DateTime.parse(map['createdAt'].toString())
           : DateTime.now(),
       isActive: map['isActive'] ?? true,
+      admin: map['admin']?.toString(),
+      fcmTokens: map['fcmTokens']?.toString() ?? '',
     );
   }
 
@@ -106,6 +112,34 @@ class UserModel {
       'addresses': addresses.map((x) => x.toMap()).toList(),
       'createdAt': createdAt.toIso8601String(),
       'isActive': isActive,
+      'admin': admin,
+      'fcmTokens': fcmTokens,
     };
+  }
+
+  UserModel copyWith({
+    String? id,
+    String? email,
+    String? fullName,
+    String? phoneNumber,
+    String? profileImage,
+    List<AddressModel>? addresses,
+    DateTime? createdAt,
+    bool? isActive,
+    String? admin,
+    String? fcmTokens,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      fullName: fullName ?? this.fullName,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      profileImage: profileImage ?? this.profileImage,
+      addresses: addresses ?? this.addresses,
+      createdAt: createdAt ?? this.createdAt,
+      isActive: isActive ?? this.isActive,
+      admin: admin ?? this.admin,
+      fcmTokens: fcmTokens ?? this.fcmTokens,
+    );
   }
 }

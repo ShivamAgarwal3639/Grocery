@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
+import 'package:grocerry/firebase/notification/fcm_service.dart';
+import 'package:grocerry/firebase/notification/notification_service.dart';
+import 'package:grocerry/firebase_options.dart';
 import 'package:grocerry/notifier/address_provider.dart';
 import 'package:grocerry/notifier/cart_notifier.dart';
 import 'package:grocerry/utils/forced_up.dart';
+import 'package:grocerry/utils/utility.dart';
 import 'package:provider/provider.dart';
 import 'notifier/auth_provider.dart';
 import 'screens/auth/login_screen.dart';
@@ -11,10 +15,13 @@ import 'screens/auth/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await NotificationService.initializeNotification();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FCMService().requestNotificationPermission();
+  await FCMService().initializeFCM();
+  Utility.i();
   final updateManager = UpdateManager();
   await updateManager.initialize();
-
   runApp(MyApp(updateManager: updateManager));
 }
 
