@@ -20,9 +20,11 @@ class OrderModel {
   final DateTime updatedAt;
   final String? notes;
   final TaxAndDeliveryModel taxAndDeliverySettings;
-  // New fields for promotion
   final PromotionModel? appliedPromotion;
   final double discountAmount;
+  // New fields
+  final String? cancelledBy;
+  final String? deliveredBy;
 
   OrderModel({
     required this.id,
@@ -43,6 +45,8 @@ class OrderModel {
     required this.taxAndDeliverySettings,
     this.appliedPromotion,
     this.discountAmount = 0.0,
+    this.cancelledBy,
+    this.deliveredBy,
   });
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
@@ -59,9 +63,9 @@ class OrderModel {
       total: (map['total'] as num?)?.toDouble() ?? 0.0,
       status: map['status'] != null
           ? OrderStatus.values.firstWhere(
-              (e) => e.toString() == 'OrderStatus.${map['status']}',
-              orElse: () => OrderStatus.pending,
-            )
+            (e) => e.toString() == 'OrderStatus.${map['status']}',
+        orElse: () => OrderStatus.pending,
+      )
           : OrderStatus.pending,
       shippingAddress: AddressModel.fromMap(map['shippingAddress'] ?? {}),
       billingAddress: map['billingAddress'] != null
@@ -76,11 +80,13 @@ class OrderModel {
           : DateTime.now(),
       notes: map['notes']?.toString(),
       taxAndDeliverySettings:
-          TaxAndDeliveryModel.fromMap(map['taxAndDeliverySettings'] ?? {}),
+      TaxAndDeliveryModel.fromMap(map['taxAndDeliverySettings'] ?? {}),
       appliedPromotion: map['appliedPromotion'] != null
           ? PromotionModel.fromFirestore(map['appliedPromotion'])
           : null,
       discountAmount: (map['discountAmount'] as num?)?.toDouble() ?? 0.0,
+      cancelledBy: map['cancelledBy']?.toString(),
+      deliveredBy: map['deliveredBy']?.toString(),
     );
   }
 
@@ -104,6 +110,8 @@ class OrderModel {
       'taxAndDeliverySettings': taxAndDeliverySettings.toMap(),
       'appliedPromotion': appliedPromotion?.toFirestore(),
       'discountAmount': discountAmount,
+      'cancelledBy': cancelledBy,
+      'deliveredBy': deliveredBy,
     };
   }
 }
