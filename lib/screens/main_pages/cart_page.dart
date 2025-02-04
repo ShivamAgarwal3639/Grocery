@@ -272,6 +272,40 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
+  bool _isWithinBusinessHours(TaxAndDeliveryModel settings) {
+    // If opening or closing time is not set, assume always open
+    if (settings.openTime == null || settings.closeTime == null) {
+      return true;
+    }
+
+    // Get current time
+    final now = TimeOfDay.now();
+
+    // Parse store hours
+    final open = TimeOfDay(
+      hour: int.parse(settings.openTime!.split(':')[0]),
+      minute: int.parse(settings.openTime!.split(':')[1]),
+    );
+
+    final close = TimeOfDay(
+      hour: int.parse(settings.closeTime!.split(':')[0]),
+      minute: int.parse(settings.closeTime!.split(':')[1]),
+    );
+
+    // Convert to comparable minutes
+    final currentMinutes = now.hour * 60 + now.minute;
+    final openMinutes = open.hour * 60 + open.minute;
+    final closeMinutes = close.hour * 60 + close.minute;
+
+    // Handle cases where closing time is on the next day
+    if (closeMinutes < openMinutes) {
+      return currentMinutes >= openMinutes || currentMinutes <= closeMinutes;
+    }
+
+    // Normal case
+    return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
+  }
+
   Widget _buildCheckoutSection(
     BuildContext context,
     CartModel cart,
@@ -293,6 +327,8 @@ class _CartPageState extends State<CartPage> {
         : 0.0;
     double finalTotal = total - discountAmount;
 
+    bool isStoreOpen = _isWithinBusinessHours(settings);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -310,6 +346,34 @@ class _CartPageState extends State<CartPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (!isStoreOpen &&
+                settings.openTime != null &&
+                settings.closeTime != null)
+              Container(
+                padding: const EdgeInsets.all(8),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.access_time,
+                        color: Colors.orange.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Store is currently closed. Open from ${settings.openTime} to ${settings.closeTime}',
+                        style: TextStyle(
+                          color: Colors.orange.shade900,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             _buildPriceRow('Subtotal', cart.subtotal),
             if (settings.toggleServiceCharge) ...[
               const SizedBox(height: 8),
@@ -337,11 +401,13 @@ class _CartPageState extends State<CartPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Get.to(() => CheckoutPage(
-                      taxAndDeliverySettings: settings,
-                      appliedPromotion: appliedPromotion,
-                      discountAmount: discountAmount,
-                    )),
+                onPressed: isStoreOpen
+                    ? () => Get.to(() => CheckoutPage(
+                          taxAndDeliverySettings: settings,
+                          appliedPromotion: appliedPromotion,
+                          discountAmount: discountAmount,
+                        ))
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green[700],
                   foregroundColor: Colors.white,
@@ -349,6 +415,7 @@ class _CartPageState extends State<CartPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
+                  disabledBackgroundColor: Colors.grey[300],
                 ),
                 child: const Text(
                   'Proceed to Checkout',
