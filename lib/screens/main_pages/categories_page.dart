@@ -81,13 +81,14 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                    crossAxisCount:
+                        MediaQuery.of(context).size.width > 600 ? 3 : 2,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
                     childAspectRatio: 0.95, // Adjusted for better proportions
                   ),
                   delegate: SliverChildBuilderDelegate(
-                        (context, index) {
+                    (context, index) {
                       final category = categories[index];
                       return LayoutBuilder(
                         builder: (context, constraints) {
@@ -180,7 +181,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.account_circle_outlined, color: Colors.black87),
+          icon:
+              const Icon(Icons.account_circle_outlined, color: Colors.black87),
           onPressed: () => Get.to(() => ProfilePage()),
         ),
         const SizedBox(width: 8),
@@ -208,8 +210,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
             child: Padding(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
                   Icon(Icons.search, color: Colors.grey[600]),
@@ -234,7 +235,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
     return StreamBuilder<List<ProductModel>>(
       stream: _productService.getProductsByCategory(category.id),
       builder: (context, productsSnapshot) {
-        final productCount = productsSnapshot.hasData ? productsSnapshot.data!.length : 0;
+        final productCount =
+            productsSnapshot.hasData ? productsSnapshot.data!.length : 0;
 
         return Material(
           elevation: 2,
@@ -258,18 +260,20 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       decoration: BoxDecoration(
                         color: backgroundColor,
                         shape: BoxShape.circle,
+                        image: DecorationImage(
+                            image: NetworkImage(category.imageUrl)),
                       ),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Icon(
-                          _getCategoryIcon(category.name),
-                          size: 32,
-                          color: backgroundColor.darken(),
-                        ),
-                      ),
+                      // child: FittedBox(
+                      //   fit: BoxFit.scaleDown,
+                      //   child: Icon(
+                      //     _getCategoryIcon(category.name),
+                      //     size: 32,
+                      //     color: backgroundColor.darken(),
+                      //   ),
+                      // ),
                     ),
                   ),
-                  const SizedBox(height: 12), // Reduced spacing
+                  const SizedBox(height: 8), // Reduced spacing
                   Flexible(
                     child: Text(
                       category.name,
@@ -282,7 +286,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     '$productCount Products',
                     style: TextStyle(
