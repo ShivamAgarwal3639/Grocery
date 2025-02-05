@@ -76,7 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       // Close progress dialog
       if (!mounted) return;
-      Navigator.pop(context);
+      Get.back();
 
       // Show success message
       Get.snackbar(

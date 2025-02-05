@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:grocerry/main.dart';
 
 class ServiceUnavailablePage extends StatelessWidget {
@@ -46,12 +47,7 @@ class ServiceUnavailablePage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   // Refresh the page to check if service is back
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AuthWrapper(),
-                    ),
-                  );
+                  Get.off(()=>AuthWrapper());
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(

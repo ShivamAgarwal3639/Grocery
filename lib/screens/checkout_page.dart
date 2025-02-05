@@ -137,8 +137,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Get.until((route) => route.isFirst);
+      // Navigator.of(context).popUntil((route) => route.isFirst);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
