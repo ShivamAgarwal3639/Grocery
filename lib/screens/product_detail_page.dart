@@ -62,7 +62,7 @@ class ProductDetailPage extends StatelessWidget {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.all(16),
-        itemCount: product.images.length,
+        itemCount: 1,
         itemBuilder: (context, index) {
           return Container(
             width: 80,
@@ -74,7 +74,7 @@ class ProductDetailPage extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: CachedNetworkImage(
-                imageUrl: product.images[index],
+                imageUrl: product.imageUrl,
                 fit: BoxFit.cover,
               ),
             ),

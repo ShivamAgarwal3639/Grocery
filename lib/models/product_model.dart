@@ -6,7 +6,6 @@ class ProductModel {
   final double? discountPrice;
   final String imageUrl;
   final String categoryId;
-  final List<String> images;
   final bool inStock;
   final int stockQuantity;
   final double rating;
@@ -22,7 +21,6 @@ class ProductModel {
     this.discountPrice,
     required this.imageUrl,
     required this.categoryId,
-    this.images = const [],
     this.inStock = true,
     this.stockQuantity = 0,
     this.rating = 0.0,
@@ -40,7 +38,6 @@ class ProductModel {
       discountPrice: (map['discountPrice'] as num?)?.toDouble(),
       imageUrl: map['imageUrl']?.toString() ?? '',
       categoryId: map['categoryId']?.toString() ?? '',
-      images: List<String>.from(map['images'] ?? []),
       inStock: map['inStock'] ?? true,
       stockQuantity: map['stockQuantity']?.toInt() ?? 0,
       rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
@@ -63,7 +60,6 @@ class ProductModel {
       'discountPrice': discountPrice,
       'imageUrl': imageUrl,
       'categoryId': categoryId,
-      'images': images,
       'inStock': inStock,
       'stockQuantity': stockQuantity,
       'rating': rating,
@@ -81,7 +77,6 @@ class ProductModel {
     double? discountPrice,
     String? imageUrl,
     String? categoryId,
-    List<String>? images,
     bool? inStock,
     int? stockQuantity,
     double? rating,
@@ -97,7 +92,6 @@ class ProductModel {
       discountPrice: discountPrice ?? this.discountPrice,
       imageUrl: imageUrl ?? this.imageUrl,
       categoryId: categoryId ?? this.categoryId,
-      images: images ?? this.images,
       inStock: inStock ?? this.inStock,
       stockQuantity: stockQuantity ?? this.stockQuantity,
       rating: rating ?? this.rating,
