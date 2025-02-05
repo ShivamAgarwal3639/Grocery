@@ -58,7 +58,7 @@ class _CartPageState extends State<CartPage> {
 
       // Validate minimum order value
       if (cart.subtotal < promotion.minOrderValue) {
-        throw 'Minimum order value of \$${promotion.minOrderValue.toStringAsFixed(2)} required';
+        throw 'Minimum order value of ₹${promotion.minOrderValue.toStringAsFixed(2)} required';
       }
 
       setState(() => appliedPromotion = promotion);
@@ -253,7 +253,7 @@ class _CartPageState extends State<CartPage> {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          'Discount: \$${_calculateDiscount(cart).toStringAsFixed(2)}',
+                          'Discount: ₹${_calculateDiscount(cart).toStringAsFixed(2)}',
                           style: TextStyle(color: Colors.green),
                         ),
                       ],
@@ -447,8 +447,8 @@ class _CartPageState extends State<CartPage> {
         ),
         Text(
           isDiscount
-              ? '-\$${amount.toStringAsFixed(2)}'
-              : '\$${amount.toStringAsFixed(2)}',
+              ? '-₹${amount.toStringAsFixed(2)}'
+              : '₹${amount.toStringAsFixed(2)}',
           style: TextStyle(
             color: isDiscount
                 ? Colors.green[700]
@@ -599,7 +599,7 @@ class _CartPageState extends State<CartPage> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '\$${item.price.toStringAsFixed(2)} each',
+                    '₹${item.price.toStringAsFixed(2)} each',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 12,
@@ -607,7 +607,7 @@ class _CartPageState extends State<CartPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\$${(item.price * item.quantity).toStringAsFixed(2)}',
+                    '₹${(item.price * item.quantity).toStringAsFixed(2)}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,

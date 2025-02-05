@@ -202,7 +202,7 @@ class _OrderCard extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    '\$${order.total.toStringAsFixed(2)}',
+                    '₹${order.total.toStringAsFixed(2)}',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

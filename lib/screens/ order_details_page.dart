@@ -201,7 +201,7 @@ class OrderDetailsPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${item.quantity}x @ \$${item.price.toStringAsFixed(2)}',
+                            '${item.quantity}x @ ₹${item.price.toStringAsFixed(2)}',
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey[600],
@@ -211,7 +211,7 @@ class OrderDetailsPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '\$${(item.price * item.quantity).toStringAsFixed(2)}',
+                      '₹${(item.price * item.quantity).toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -347,7 +347,7 @@ class OrderDetailsPage extends StatelessWidget {
     final promotion = order.appliedPromotion!;
     final discountText = promotion.discountType == 'PERCENTAGE'
         ? '${promotion.discountValue}% OFF'
-        : '\$${promotion.discountValue} OFF';
+        : '₹${promotion.discountValue} OFF';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -373,7 +373,7 @@ class OrderDetailsPage extends StatelessWidget {
               ],
             ),
             Text(
-              '-\$${order.discountAmount.toStringAsFixed(2)}',
+              '-₹${order.discountAmount.toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -407,7 +407,7 @@ class OrderDetailsPage extends StatelessWidget {
           ),
         ),
         Text(
-          '\$${amount.toStringAsFixed(2)}',
+          '₹${amount.toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: isTotal ? 15 : 13,
             fontWeight: isTotal ? FontWeight.w600 : FontWeight.w500,
@@ -501,10 +501,10 @@ class OrderDetailsPage extends StatelessWidget {
 
 📦 *Order Details*
 Total Items: ${order.items.fold(0, (sum, item) => sum + item.quantity)}
-Total Amount: \$${order.total.toStringAsFixed(2)}
+Total Amount: ₹${order.total.toStringAsFixed(2)}
 
 🛒 *Items*
-${order.items.map((item) => '• ${item.product.name} (${item.quantity}x) - \$${(item.price * item.quantity).toStringAsFixed(2)}').join('\n')}
+${order.items.map((item) => '• ${item.product.name} (${item.quantity}x) - ₹${(item.price * item.quantity).toStringAsFixed(2)}').join('\n')}
 
 🏠 *Delivery Address*
 ${order.shippingAddress.street}, 

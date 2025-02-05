@@ -58,7 +58,7 @@ class OTPScreen extends StatelessWidget {
                     onCompleted: (otp) async {
                       final auth = context.read<AuthProviderC>();
                       if (await auth.verifyOTP(otp, context)) {
-                        Get.off(() => HomeScreen());
+                        Get.offAll(() => HomeScreen());
                       }
                     },
                     pinTheme: PinTheme(

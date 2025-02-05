@@ -231,8 +231,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         ),
         Text(
           isDiscount
-              ? '-\$${amount.toStringAsFixed(2)}'
-              : '\$${amount.toStringAsFixed(2)}',
+              ? '-₹${amount.toStringAsFixed(2)}'
+              : '₹${amount.toStringAsFixed(2)}',
           style: TextStyle(
             fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
             fontSize: isTotal ? 16 : 14,
@@ -467,7 +467,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     ),
                   ),
                   Text(
-                    '\$${total.toStringAsFixed(2)}',
+                    '₹${total.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

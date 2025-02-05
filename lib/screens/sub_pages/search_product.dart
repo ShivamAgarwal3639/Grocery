@@ -295,7 +295,7 @@ class _SearchPageState extends State<SearchPage> {
                           children: [
                             if (product.discountPrice != null)
                               Text(
-                                '\$${product.price.toStringAsFixed(2)}',
+                                '₹${product.price.toStringAsFixed(2)}',
                                 style: TextStyle(
                                   decoration: TextDecoration.lineThrough,
                                   color: Colors.grey[600],
@@ -303,7 +303,7 @@ class _SearchPageState extends State<SearchPage> {
                                 ),
                               ),
                             Text(
-                              '\$${(product.discountPrice ?? product.price).toStringAsFixed(2)}',
+                              '₹${(product.discountPrice ?? product.price).toStringAsFixed(2)}',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,

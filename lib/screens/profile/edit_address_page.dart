@@ -279,7 +279,7 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
                 : GoogleMap(
               initialCameraPosition: CameraPosition(
                 target: _selectedLocation ?? _storeLocation!,
-                zoom: 17, // Increased zoom level
+                zoom: 17,
               ),
               onMapCreated: (controller) {
                 _mapController = controller;
@@ -292,16 +292,6 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
               zoomControlsEnabled: true,
               mapToolbarEnabled: false,
               compassEnabled: true,
-              onCameraMove: (position) {
-                if (_markers.isNotEmpty) {
-                  _updateMarker(position.target);
-                }
-              },
-              onCameraIdle: () {
-                if (_markers.isNotEmpty && !_isOutOfBounds) {
-                  _getAddressFromLatLng(_markers.first.position);
-                }
-              },
               onTap: (position) {
                 _updateMarker(position);
                 _getAddressFromLatLng(position);
