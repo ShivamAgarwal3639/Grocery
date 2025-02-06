@@ -139,7 +139,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: _currentImageIndex == index
-                      ? Colors.pink
+                      ? Colors.green
                       : Colors.grey[300]!,
                   width: _currentImageIndex == index ? 2 : 1,
                 ),
@@ -285,8 +285,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             top: 0,
                             child: Container(
                               padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Colors.pink,
+                              decoration:  BoxDecoration(
+                                color: Colors.green[700],
                                 shape: BoxShape.circle,
                               ),
                               child: Text(
@@ -306,7 +306,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             vertical: 9, horizontal: 0),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
-                        side: const BorderSide(color: Colors.pink),
+                        side:  BorderSide(color: Colors.green),
                       ),
                     ),
                   ),
@@ -315,7 +315,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     flex: 3,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.pink,
+                        color: Colors.green[700],
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -350,6 +350,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ] else
                   Expanded(
                     child: ElevatedButton(
+
                       onPressed: widget.product.inStock
                           ? () {
                         cartNotifier.addToCart(widget.product);
@@ -363,7 +364,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pink,
+                        backgroundColor: Colors.green[700],
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
