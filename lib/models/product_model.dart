@@ -4,7 +4,7 @@ class ProductModel {
   final String description;
   final double price;
   final double? discountPrice;
-  final String imageUrl;
+  final List<String> imageUrls; // Changed from single imageUrl to list
   final String categoryId;
   final bool inStock;
   final int stockQuantity;
@@ -19,7 +19,7 @@ class ProductModel {
     required this.description,
     required this.price,
     this.discountPrice,
-    required this.imageUrl,
+    required this.imageUrls, // Changed parameter
     required this.categoryId,
     this.inStock = true,
     this.stockQuantity = 0,
@@ -36,7 +36,7 @@ class ProductModel {
       description: map['description']?.toString() ?? '',
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
       discountPrice: (map['discountPrice'] as num?)?.toDouble(),
-      imageUrl: map['imageUrl']?.toString() ?? '',
+      imageUrls: List<String>.from(map['imageUrls'] ?? []), // Changed from imageUrl
       categoryId: map['categoryId']?.toString() ?? '',
       inStock: map['inStock'] ?? true,
       stockQuantity: map['stockQuantity']?.toInt() ?? 0,
@@ -58,7 +58,7 @@ class ProductModel {
       'description': description,
       'price': price,
       'discountPrice': discountPrice,
-      'imageUrl': imageUrl,
+      'imageUrls': imageUrls, // Changed from imageUrl
       'categoryId': categoryId,
       'inStock': inStock,
       'stockQuantity': stockQuantity,
@@ -75,7 +75,7 @@ class ProductModel {
     String? description,
     double? price,
     double? discountPrice,
-    String? imageUrl,
+    List<String>? imageUrls, // Changed parameter
     String? categoryId,
     bool? inStock,
     int? stockQuantity,
@@ -90,7 +90,7 @@ class ProductModel {
       description: description ?? this.description,
       price: price ?? this.price,
       discountPrice: discountPrice ?? this.discountPrice,
-      imageUrl: imageUrl ?? this.imageUrl,
+      imageUrls: imageUrls ?? this.imageUrls,
       categoryId: categoryId ?? this.categoryId,
       inStock: inStock ?? this.inStock,
       stockQuantity: stockQuantity ?? this.stockQuantity,

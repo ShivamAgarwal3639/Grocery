@@ -558,7 +558,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     Hero(
                       tag: 'product-${product.id}',
                       child: CachedNetworkImage(
-                        imageUrl: product.imageUrl,
+                        imageUrl: product.imageUrls.first,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
                           color: Colors.grey[200],

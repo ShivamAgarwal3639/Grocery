@@ -562,7 +562,7 @@ class _CartPageState extends State<CartPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: CachedNetworkImage(
-                imageUrl: item.product.imageUrl,
+                imageUrl: item.product.imageUrls.isNotEmpty?item.product.imageUrls[0]:"",
                 width: 60,
                 height: 60,
                 fit: BoxFit.cover,

@@ -166,7 +166,7 @@ class OrderDetailsPage extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: CachedNetworkImage(
-                        imageUrl: item.product.imageUrl,
+                        imageUrl: item.product.imageUrls.isNotEmpty?item.product.imageUrls[0]:"",
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,

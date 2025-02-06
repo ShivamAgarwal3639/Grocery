@@ -41,7 +41,7 @@ class ProductDetailPage extends StatelessWidget {
         background: Hero(
           tag: 'product-${product.id}',
           child: CachedNetworkImage(
-            imageUrl: product.imageUrl,
+            imageUrl: product.imageUrls.first,
             fit: BoxFit.cover,
           ),
         ),
@@ -74,7 +74,7 @@ class ProductDetailPage extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: CachedNetworkImage(
-                imageUrl: product.imageUrl,
+                imageUrl: product.imageUrls.first,
                 fit: BoxFit.cover,
               ),
             ),

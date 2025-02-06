@@ -224,7 +224,9 @@ class _OrderCard extends StatelessWidget {
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: Image.network(
-                          item.product.imageUrl,
+                          item.product.imageUrls.isNotEmpty
+                              ? item.product.imageUrls[0]
+                              : "",
                           width: 40,
                           height: 40,
                           fit: BoxFit.cover,

@@ -248,7 +248,7 @@ class _SearchPageState extends State<SearchPage> {
                 child: Hero(
                   tag: 'search-${product.id}',
                   child: CachedNetworkImage(
-                    imageUrl: product.imageUrl,
+                    imageUrl: product.imageUrls.first,
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
