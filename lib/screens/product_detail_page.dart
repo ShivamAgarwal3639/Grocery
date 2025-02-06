@@ -6,10 +6,30 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:grocerry/models/product_model.dart';
 
-class ProductDetailPage extends StatelessWidget {
+class ProductDetailPage extends StatefulWidget {
   final ProductModel product;
 
   const ProductDetailPage({super.key, required this.product});
+
+  @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> {
+  late PageController _pageController;
+  int _currentImageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +58,50 @@ class ProductDetailPage extends StatelessWidget {
       expandedHeight: 300,
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
-        background: Hero(
-          tag: 'product-${product.id}',
-          child: CachedNetworkImage(
-            imageUrl: product.imageUrls.first,
-            fit: BoxFit.cover,
-          ),
+        background: Stack(
+          children: [
+            // Main image slider
+            PageView.builder(
+              controller: _pageController,
+              itemCount: widget.product.imageUrls.length,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentImageIndex = index;
+                });
+              },
+              itemBuilder: (context, index) {
+                return Hero(
+                  tag: 'product-${widget.product.id}',
+                  child: CachedNetworkImage(
+                    imageUrl: widget.product.imageUrls[index],
+                    fit: BoxFit.cover,
+                  ),
+                );
+              },
+            ),
+            // Dot indicators
+            Positioned(
+              bottom: 16,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: widget.product.imageUrls.asMap().entries.map((entry) {
+                  return Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentImageIndex == entry.key
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.5),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
         ),
       ),
       leading: IconButton(
@@ -62,20 +120,34 @@ class ProductDetailPage extends StatelessWidget {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.all(16),
-        itemCount: 1,
+        itemCount: widget.product.imageUrls.length,
         itemBuilder: (context, index) {
-          return Container(
-            width: 80,
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: CachedNetworkImage(
-                imageUrl: product.imageUrls.first,
-                fit: BoxFit.cover,
+          return GestureDetector(
+            onTap: () {
+              _pageController.animateToPage(
+                index,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            },
+            child: Container(
+              width: 80,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _currentImageIndex == index
+                      ? Colors.pink
+                      : Colors.grey[300]!,
+                  width: _currentImageIndex == index ? 2 : 1,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: CachedNetworkImage(
+                  imageUrl: widget.product.imageUrls[index],
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           );
@@ -84,6 +156,7 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 
+  // Rest of the code remains the same...
   Widget _buildProductInfo(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -95,15 +168,15 @@ class ProductDetailPage extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  product.name,
+                  widget.product.name,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              if (product.discountPrice != null) ...[
+              if (widget.product.discountPrice != null) ...[
                 Text(
-                  '₹${product.price.toStringAsFixed(2)}',
+                  '₹${widget.product.price.toStringAsFixed(2)}',
                   style: TextStyle(
                     decoration: TextDecoration.lineThrough,
                     color: Colors.grey[600],
@@ -112,25 +185,18 @@ class ProductDetailPage extends StatelessWidget {
                 const SizedBox(width: 8),
               ],
               Text(
-                '₹${(product.discountPrice ?? product.price).toStringAsFixed(2)}',
+                '₹${(widget.product.discountPrice ?? widget.product.price).toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 4),
           Row(
             children: [
-              // Icon(Icons.star, color: Colors.amber[700], size: 20),
-              // const SizedBox(width: 4),
-              // Text(
-              //   product.rating.toStringAsFixed(1),
-              //   style: const TextStyle(fontWeight: FontWeight.bold),
-              // ),
-              // const SizedBox(width: 16),
-              if (product.inStock)
+              if (widget.product.inStock)
                 const Text(
                   'In Stock',
                   style: TextStyle(color: Colors.green),
@@ -162,7 +228,7 @@ class ProductDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            product.description,
+            widget.product.description,
             style: TextStyle(
               color: Colors.grey[600],
               height: 1.5,
@@ -176,9 +242,8 @@ class ProductDetailPage extends StatelessWidget {
   Widget _buildDynamicBottomBar(BuildContext context) {
     return Consumer<CartNotifier>(
       builder: (context, cartNotifier, child) {
-        // Fixed the null handling here
         final cartItem = cartNotifier.cart.items
-            .where((item) => item.product.id == product.id)
+            .where((item) => item.product.id == widget.product.id)
             .firstOrNull;
 
         final isInCart = cartItem != null;
@@ -200,16 +265,15 @@ class ProductDetailPage extends StatelessWidget {
             child: Row(
               children: [
                 if (isInCart && cartItem != null) ...[
-                  // View Cart Button
                   Expanded(
                     flex: 2,
                     child: OutlinedButton.icon(
                       onPressed: () => Get.to(() => CartPage()),
                       icon: Stack(
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: const Icon(
+                          const Padding(
+                            padding: EdgeInsets.all(5.0),
+                            child: Icon(
                               Icons.shopping_cart_outlined,
                               size: 20,
                             ),
@@ -245,7 +309,6 @@ class ProductDetailPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Quantity Controls
                   Expanded(
                     flex: 3,
                     child: Container(
@@ -283,20 +346,19 @@ class ProductDetailPage extends StatelessWidget {
                     ),
                   ),
                 ] else
-                  // Add to Cart Button
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: product.inStock
+                      onPressed: widget.product.inStock
                           ? () {
-                              cartNotifier.addToCart(product);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content:
-                                      Text('${product.name} added to cart'),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            }
+                        cartNotifier.addToCart(widget.product);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content:
+                            Text('${widget.product.name} added to cart'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.pink,
