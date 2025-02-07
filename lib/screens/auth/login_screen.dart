@@ -71,8 +71,11 @@ class LoginScreen extends StatelessWidget {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a phone number';
                           }
-                          if (!value.contains(RegExp(r'^\+?[\d\s-]+$'))) {
-                            return 'Please enter a valid phone number';
+                          // Remove any spaces, dashes or other non-digit characters
+                          String cleanNumber = value.replaceAll(RegExp(r'[^\d]'), '');
+
+                          if (cleanNumber.length != 10) {
+                            return 'Phone number must be exactly 10 digits';
                           }
                           return null;
                         },

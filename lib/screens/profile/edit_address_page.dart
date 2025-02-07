@@ -58,12 +58,12 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
       await taxAndDeliveryService.getTaxAndDelivery('default');
 
       if (storeSettings != null &&
-          storeSettings.deliveryCordinate != null &&
+          storeSettings.shopLocation != null &&
           storeSettings.deliveryDistance != null) {
         setState(() {
           _storeLocation = LatLng(
-            storeSettings.deliveryCordinate!['latitude']!,
-            storeSettings.deliveryCordinate!['longitude']!,
+            storeSettings.shopLocation!['latitude']!,
+            storeSettings.shopLocation!['longitude']!,
           );
           _maxDeliveryDistance = storeSettings.deliveryDistance;
         });

@@ -7,7 +7,7 @@ class TaxAndDeliveryModel {
   final double? deliveryFeeNotApplyIfCartValueGreaterThan;
   final bool toggleServiceCharge;
   final double serviceChargeAmount;
-  final Map<String, double>? deliveryCordinate;
+  final Map<String, double>? shopLocation;
   final double? deliveryDistance;
   final String? whatsappNumber;
   final String? openTime;  // Store time in 24-hour format HH:mm
@@ -22,7 +22,7 @@ class TaxAndDeliveryModel {
     this.deliveryFeeNotApplyIfCartValueGreaterThan,
     this.toggleServiceCharge = false,
     this.serviceChargeAmount = 0.0,
-    this.deliveryCordinate,
+    this.shopLocation,
     this.deliveryDistance,
     this.whatsappNumber,
     this.openTime,
@@ -40,8 +40,8 @@ class TaxAndDeliveryModel {
       map['deliveryFeeNotApplyIfCartValueGreaterThan']?.toDouble(),
       toggleServiceCharge: map['toggleServiceCharge'] ?? false,
       serviceChargeAmount: (map['serviceChargeAmount'] ?? 0.0).toDouble(),
-      deliveryCordinate: map['deliveryCordinate'] != null
-          ? Map<String, double>.from(map['deliveryCordinate'])
+      shopLocation: map['shopLocation'] != null
+          ? Map<String, double>.from(map['shopLocation'])
           : null,
       deliveryDistance: map['deliveryDistance']?.toDouble(),
       whatsappNumber: map['whatsappNumber']?.toString(),
@@ -61,7 +61,7 @@ class TaxAndDeliveryModel {
       deliveryFeeNotApplyIfCartValueGreaterThan,
       'toggleServiceCharge': toggleServiceCharge,
       'serviceChargeAmount': serviceChargeAmount,
-      'deliveryCordinate': deliveryCordinate,
+      'shopLocation': shopLocation,
       'deliveryDistance': deliveryDistance,
       'whatsappNumber': whatsappNumber,
       'openTime': openTime,
@@ -78,7 +78,7 @@ class TaxAndDeliveryModel {
     double? deliveryFeeNotApplyIfCartValueGreaterThan,
     bool? toggleServiceCharge,
     double? serviceChargeAmount,
-    Map<String, double>? deliveryCordinate,
+    Map<String, double>? shopLocation,
     double? deliveryDistance,
     String? whatsappNumber,
     String? openTime,
@@ -95,7 +95,7 @@ class TaxAndDeliveryModel {
           this.deliveryFeeNotApplyIfCartValueGreaterThan,
       toggleServiceCharge: toggleServiceCharge ?? this.toggleServiceCharge,
       serviceChargeAmount: serviceChargeAmount ?? this.serviceChargeAmount,
-      deliveryCordinate: deliveryCordinate ?? this.deliveryCordinate,
+      shopLocation: shopLocation ?? this.shopLocation,
       deliveryDistance: deliveryDistance ?? this.deliveryDistance,
       whatsappNumber: whatsappNumber ?? this.whatsappNumber,
       openTime: openTime ?? this.openTime,
