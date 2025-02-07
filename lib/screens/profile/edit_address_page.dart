@@ -45,8 +45,10 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
   void initState() {
     super.initState();
     _labelController = TextEditingController(text: widget.address?.label ?? '');
-    _streetController = TextEditingController(text: widget.address?.street ?? '');
-    _numberController = TextEditingController(text: widget.address?.number ?? '');
+    _streetController =
+        TextEditingController(text: widget.address?.street ?? '');
+    _numberController =
+        TextEditingController(text: widget.address?.number ?? '');
     _isDefault = widget.address?.isDefault ?? false;
     _loadStoreLocation();
   }
@@ -55,7 +57,7 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
     try {
       TaxAndDeliveryService taxAndDeliveryService = TaxAndDeliveryService();
       TaxAndDeliveryModel? storeSettings =
-      await taxAndDeliveryService.getTaxAndDelivery('default');
+          await taxAndDeliveryService.getTaxAndDelivery('default');
 
       if (storeSettings != null &&
           storeSettings.shopLocation != null &&
@@ -98,7 +100,8 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
         Marker(
           markerId: const MarkerId('store_location'),
           position: _storeLocation!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
           infoWindow: const InfoWindow(title: 'Store Location'),
         ),
       );
@@ -178,7 +181,7 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
       _isOutOfBounds = !isValidLocation;
 
       _markers.removeWhere(
-            (marker) => marker.markerId.value == 'selected_location',
+        (marker) => marker.markerId.value == 'selected_location',
       );
       _markers.add(
         Marker(
@@ -205,7 +208,9 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
             }
           },
           icon: BitmapDescriptor.defaultMarkerWithHue(
-            isValidLocation ? BitmapDescriptor.hueRed : BitmapDescriptor.hueAzure,
+            isValidLocation
+                ? BitmapDescriptor.hueRed
+                : BitmapDescriptor.hueAzure,
           ),
         ),
       );
@@ -243,16 +248,15 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
         });
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to get address details',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      // Get.snackbar(
+      //   'Error',
+      //   'Failed to get address details',
+      //   snackPosition: SnackPosition.BOTTOM,
+      //   backgroundColor: Colors.red,
+      //   colorText: Colors.white,
+      // );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -277,26 +281,29 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
             child: _storeLocation == null
                 ? const Center(child: CircularProgressIndicator())
                 : GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: _selectedLocation ?? _storeLocation!,
-                zoom: 17,
-              ),
-              onMapCreated: (controller) {
-                _mapController = controller;
-                controller.setMapStyle(_mapStyle);
-              },
-              markers: _markers,
-              circles: _circles,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
-              zoomControlsEnabled: true,
-              mapToolbarEnabled: false,
-              compassEnabled: true,
-              onTap: (position) {
-                _updateMarker(position);
-                _getAddressFromLatLng(position);
-              },
-            ),
+                    initialCameraPosition: CameraPosition(
+                      target: _selectedLocation ?? _storeLocation!,
+                      zoom: 17,
+                    ),
+                    onMapCreated: (controller) {
+                      _mapController = controller;
+                      controller.setMapStyle(_mapStyle);
+                    },
+                    markers: _markers,
+                    circles: _circles,
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
+                    zoomControlsEnabled: true,
+                    mapToolbarEnabled: false,
+                    compassEnabled: true,
+                    onTap: (position) {
+                      _updateMarker(position);
+                      _getAddressFromLatLng(position);
+                    },
+                    onCameraMove: (position) {
+                      _updateMarker(position.target);
+                      _getAddressFromLatLng(position.target);
+                    }),
           ),
           if (_isOutOfBounds)
             Container(
