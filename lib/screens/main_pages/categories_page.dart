@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:grocerry/firebase/category_service.dart';
@@ -260,17 +261,32 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       decoration: BoxDecoration(
                         color: backgroundColor,
                         shape: BoxShape.circle,
-                        image: DecorationImage(
-                            image: NetworkImage(category.imageUrl)),
                       ),
-                      // child: FittedBox(
-                      //   fit: BoxFit.scaleDown,
-                      //   child: Icon(
-                      //     _getCategoryIcon(category.name),
-                      //     size: 32,
-                      //     color: backgroundColor.darken(),
-                      //   ),
-                      // ),
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: category.imageUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey[200],
+                            child: const Icon(
+                              Icons.error_outline,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8), // Reduced spacing

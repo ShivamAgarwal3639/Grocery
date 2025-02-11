@@ -4,8 +4,77 @@ import 'package:grocerry/notifier/auth_provider.dart';
 import 'package:grocerry/screens/auth/home_screen.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
-class OTPScreen extends StatelessWidget {
+class OTPScreen extends StatefulWidget {
+  final String phoneNumber;
+
+  const OTPScreen({Key? key, required this.phoneNumber}) : super(key: key);
+
+  @override
+  State<OTPScreen> createState() => _OTPScreenState();
+}
+
+class _OTPScreenState extends State<OTPScreen> {
+  int _remainingTime = 45;
+  Timer? _timer;
+  bool _canResend = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    setState(() {
+      _remainingTime = 45;
+      _canResend = false;
+    });
+
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingTime > 0) {
+        setState(() {
+          _remainingTime--;
+        });
+      } else {
+        setState(() {
+          _canResend = true;
+        });
+        timer.cancel();
+      }
+    });
+  }
+
+  Future<void> _resendOTP() async {
+    final auth = context.read<AuthProvider>();
+    final success = await auth.sendOTP(widget.phoneNumber);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('OTP resent successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      _startTimer();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to resend OTP'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,9 +125,16 @@ class OTPScreen extends StatelessWidget {
                     length: 6,
                     onChanged: (_) {},
                     onCompleted: (otp) async {
-                      final auth = context.read<AuthProviderC>();
-                      if (await auth.verifyOTP(otp, context)) {
+                      final auth = context.read<AuthProvider>();
+                      if (await auth.verifyOTP(otp, widget.phoneNumber)) {
                         Get.offAll(() => HomeScreen());
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Invalid OTP'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
                       }
                     },
                     pinTheme: PinTheme(
@@ -77,6 +153,26 @@ class OTPScreen extends StatelessWidget {
                     keyboardType: TextInputType.number,
                     animationType: AnimationType.scale,
                     animationDuration: const Duration(milliseconds: 200),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Center(
+                  child: _canResend
+                      ? TextButton(
+                    onPressed: _resendOTP,
+                    child: Text(
+                      'Resend OTP',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                      : Text(
+                    'Resend OTP in $_remainingTime seconds',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                    ),
                   ),
                 ),
               ],

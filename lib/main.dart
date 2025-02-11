@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -23,7 +22,7 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FCMService().requestNotificationPermission();
   await FCMService().initializeFCM();
-  Utility.i();
+
   final updateManager = UpdateManager();
   await updateManager.initialize();
   runApp(MyApp(updateManager: updateManager));
@@ -41,7 +40,7 @@ class MyApp extends StatelessWidget {
           create: (context) => CartNotifier()..loadCart(),
         ),
         ChangeNotifierProvider(
-          create: (context) => AuthProviderC(),
+          create: (context) => AuthProvider()..initialize(),
         ),
         ChangeNotifierProvider(create: (_) => AddressProvider()),
       ],
@@ -83,6 +82,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   void initState() {
     super.initState();
     _initializeRemoteConfig();
+    Utility.initialize(context);
   }
 
   Future<void> _initializeRemoteConfig() async {
@@ -99,32 +99,16 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProviderC>(
+    return Consumer<AuthProvider>(
       builder: (context, auth, _) {
-        return StreamBuilder<User?>(
-          stream: auth.authStateChanges,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            }
-
-            // Check if service is out of service
-            final isOutOfService = _remoteConfig.getBool('is_out_of_service');
-            if (isOutOfService) {
-              return const ServiceUnavailablePage();
-            }
-
-            if (snapshot.hasData) {
-              return HomeScreen();
-            }
-
-            return LoginScreen();
-          },
-        );
+        final isOutOfService = _remoteConfig.getBool('is_out_of_service');
+        if (isOutOfService) {
+          return const ServiceUnavailablePage();
+        }
+        if (auth.isAuthenticated) {
+          return HomeScreen();
+        }
+        return LoginScreen();
       },
     );
   }

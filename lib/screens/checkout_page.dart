@@ -8,10 +8,10 @@ import 'package:grocerry/models/promotion_model.dart';
 import 'package:grocerry/models/user_model.dart';
 import 'package:grocerry/models/tax_delivery_model.dart';
 import 'package:grocerry/notifier/address_provider.dart';
+import 'package:grocerry/notifier/auth_provider.dart';
 import 'package:grocerry/notifier/cart_notifier.dart';
 import 'package:grocerry/screens/profile/address_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -41,12 +41,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   void _loadUserAddresses() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    if (authProvider.phoneNumber != null) {
       // Use a post-frame callback to ensure context is available
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Provider.of<AddressProvider>(context, listen: false)
-            .loadAddresses(user.uid);
+            .loadAddresses(authProvider.phoneNumber!);
       });
     }
   }
@@ -100,8 +101,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
     setState(() => isProcessing = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception('User not authenticated');
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      if (authProvider.phoneNumber == null)
+        throw Exception('User not authenticated');
 
       final cartNotifier = Provider.of<CartNotifier>(context, listen: false);
       final cart = cartNotifier.cart;
@@ -109,7 +112,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
       final order = OrderModel(
         id: const Uuid().v4(),
-        userId: user.uid,
+        userId: authProvider.phoneNumber!,
         items: cart.items,
         subtotal: charges['subtotal']!,
         serviceCharge: charges['serviceCharge']!,
@@ -283,8 +286,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildAddressSection(AddressProvider addressProvider) {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    if (authProvider.phoneNumber == null) {
       return Center(child: Text('Please log in to manage addresses'));
     }
 

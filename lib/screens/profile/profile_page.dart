@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
@@ -21,7 +20,8 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final UserService _userService = UserService();
-  final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+  final authProvider = Provider.of<AuthProvider>(Get.context!, listen: false);
+
 
   final StorageService _storageService = StorageService();
   bool _isUploading = false;
@@ -72,7 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
       // Upload image
-      await _storageService.uploadProfileImage(userId, imageFile);
+      await _storageService.uploadProfileImage(authProvider.phoneNumber!, imageFile);
 
       // Close progress dialog
       if (!mounted) return;
@@ -104,7 +104,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<UserModel?>(
-        stream: _userService.streamUser(userId),
+        stream: _userService.streamUser(authProvider.phoneNumber!),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -410,8 +410,8 @@ class _ProfilePageState extends State<ProfilePage> {
             onPressed: () async {
               try {
                 final authProvider =
-                    Provider.of<AuthProviderC>(context, listen: false);
-                await authProvider.signOut(context);
+                    Provider.of<AuthProvider>(context, listen: false);
+                await authProvider.signOut();
                 Get.offAll(() => LoginScreen());
               } catch (e) {
                 Get.snackbar(

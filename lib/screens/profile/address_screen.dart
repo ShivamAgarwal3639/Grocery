@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:grocerry/models/user_model.dart';
 import 'package:grocerry/notifier/address_provider.dart';
+import 'package:grocerry/notifier/auth_provider.dart';
 import 'package:grocerry/screens/profile/edit_address_page.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class AddressListPage extends StatefulWidget {
   const AddressListPage({super.key});
@@ -19,9 +19,10 @@ class _AddressListPageState extends State<AddressListPage> {
     super.initState();
     // Load addresses once when the page is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        context.read<AddressProvider>().loadAddresses(user.uid);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      if (authProvider.phoneNumber != null) {
+        context.read<AddressProvider>().loadAddresses(authProvider.phoneNumber!);
       }
     });
   }
@@ -73,8 +74,9 @@ class _AddressListPageState extends State<AddressListPage> {
                 ),
                 TextButton(
                   onPressed: () {
-                    final user = FirebaseAuth.instance.currentUser;
-                    if (user != null) addressProvider.loadAddresses(user.uid);
+                    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+                    if (authProvider.phoneNumber != null) addressProvider.loadAddresses(authProvider.phoneNumber!);
                   },
                   child: const Text('Retry', style: TextStyle(color: Colors.green)),
                 ),
@@ -123,7 +125,8 @@ class _AddressListPageState extends State<AddressListPage> {
   }
 
   Widget _buildAddressCard(BuildContext context, AddressModel address) {
-    final user = FirebaseAuth.instance.currentUser;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
     final addressProvider = Provider.of<AddressProvider>(context, listen: false);
 
     return Card(
@@ -193,13 +196,13 @@ class _AddressListPageState extends State<AddressListPage> {
                       ),
                     ],
                     onSelected: (value) async {
-                      if (user == null) return;
+                      if (authProvider.phoneNumber == null) return;
                       switch (value) {
                         case 'delete':
-                          _showDeleteDialog(context, user.uid, address.id);
+                          _showDeleteDialog(context, authProvider.phoneNumber!, address.id);
                           break;
                         case 'default':
-                          await addressProvider.setDefaultAddress(user.uid, address.id);
+                          await addressProvider.setDefaultAddress(authProvider.phoneNumber!, address.id);
                           break;
                       }
                     },

@@ -1,20 +1,22 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:grocerry/firebase/order_service.dart';
 import 'package:grocerry/models/order_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:grocerry/notifier/auth_provider.dart';
 import 'package:grocerry/screens/%20order_details_page.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class OrderListPage extends StatelessWidget {
   const OrderListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final orderService = OrderService();
 
-    if (user == null) {
+    if (authProvider.phoneNumber == null) {
       return Scaffold(
         backgroundColor: Colors.grey[50],
         body: Center(
@@ -52,7 +54,7 @@ class OrderListPage extends StatelessWidget {
         ),
       ),
       body: StreamBuilder<List<OrderModel>>(
-        stream: orderService.getUserOrders(user.uid),
+        stream: orderService.getUserOrders(authProvider.phoneNumber!),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(
@@ -223,13 +225,32 @@ class _OrderCard extends StatelessWidget {
                       final item = order.items[index];
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(4),
-                        child: Image.network(
-                          item.product.imageUrls.isNotEmpty
+                        child: CachedNetworkImage(
+                          imageUrl: item.product.imageUrls.isNotEmpty
                               ? item.product.imageUrls[0]
                               : "",
                           width: 40,
                           height: 40,
                           fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey[200],
+                            child: const Icon(
+                              Icons.error_outline,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
                       );
                     },

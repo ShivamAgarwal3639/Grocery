@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:grocerry/notifier/auth_provider.dart';
@@ -31,17 +33,17 @@ class LoginScreen extends StatelessWidget {
                   Text(
                     'Welcome Back',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Enter your phone number to continue',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                          color: Colors.grey[600],
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
@@ -62,18 +64,19 @@ class LoginScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
                           ),
-                          prefixIcon: Icon(Icons.phone, color: Theme.of(context).primaryColor),
+                          prefixIcon: Icon(Icons.phone,
+                              color: Theme.of(context).primaryColor),
                           filled: true,
                           fillColor: Colors.white,
-                          contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 16),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a phone number';
                           }
-                          // Remove any spaces, dashes or other non-digit characters
-                          String cleanNumber = value.replaceAll(RegExp(r'[^\d]'), '');
-
+                          String cleanNumber =
+                              value.replaceAll(RegExp(r'[^\d]'), '');
                           if (cleanNumber.length != 10) {
                             return 'Phone number must be exactly 10 digits';
                           }
@@ -83,16 +86,49 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Consumer<AuthProviderC>(
+                  Consumer<AuthProvider>(
                     builder: (context, auth, _) => ElevatedButton(
                       onPressed: auth.isLoading
                           ? null
                           : () async {
-                        if (_formKey.currentState!.validate()) {
-                          await auth.sendOTP(_phoneController.text);
-                          Get.to(() => OTPScreen());
-                        }
-                      },
+                              if (_formKey.currentState!.validate()) {
+                                try {
+                                  final success =
+                                      await auth.sendOTP(_phoneController.text);
+                                  if (success) {
+                                    // Store the BuildContext in a local variable
+                                    final scaffoldContext = context;
+
+                                    // Navigate to OTP screen
+                                    final result = await Get.to(() => OTPScreen(
+                                        phoneNumber: _phoneController.text));
+
+                                    // If navigation was cancelled or failed, show error message
+                                    if (result == null &&
+                                        scaffoldContext.mounted) {
+                                      ScaffoldMessenger.of(scaffoldContext)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Failed to send OTP'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  } else if (context.mounted) {
+                                    // Check if context is still valid
+                                    ScaffoldMessenger.of(Get.context!)
+                                        .showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Failed to send OTP'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  log("error $e");
+                                }
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -102,14 +138,15 @@ class LoginScreen extends StatelessWidget {
                       ),
                       child: auth.isLoading
                           ? SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
                           : Text(
-                        'Continue',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
+                              'Continue',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
                     ),
                   ),
                 ],

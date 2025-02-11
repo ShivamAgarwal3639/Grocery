@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:grocerry/firebase/user_service.dart';
 import 'package:grocerry/models/user_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:grocerry/notifier/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class EditProfilePage extends StatefulWidget {
   final UserModel user;
@@ -38,11 +39,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isLoading = true);
       try {
-        final userId = FirebaseAuth.instance.currentUser?.uid;
-        if (userId == null) throw Exception('User not authenticated');
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+        if (authProvider.phoneNumber == null) throw Exception('User not authenticated');
 
         await _userService.updateUserProfile(
-          userId,
+          authProvider.phoneNumber!,
           fullName: _nameController.text,
           phoneNumber: _phoneController.text,
         );

@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -8,6 +7,7 @@ import 'package:grocerry/firebase/tax_delivery_service.dart';
 import 'package:grocerry/models/tax_delivery_model.dart';
 import 'package:grocerry/models/user_model.dart';
 import 'package:grocerry/notifier/address_provider.dart';
+import 'package:grocerry/notifier/auth_provider.dart';
 import 'package:provider/provider.dart';
 
 class AddEditAddressPage extends StatefulWidget {
@@ -493,8 +493,8 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
 
       setState(() => _isSaving = true);
 
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      if (authProvider.phoneNumber == null) {
         Get.snackbar(
           'Error',
           'You must be logged in to save addresses',
@@ -524,9 +524,9 @@ class _AddEditAddressPageState extends State<AddEditAddressPage> {
         );
 
         if (widget.address != null) {
-          await addressProvider.updateAddress(user.uid, address);
+          await addressProvider.updateAddress(authProvider.phoneNumber!, address);
         } else {
-          await addressProvider.addAddress(user.uid, address);
+          await addressProvider.addAddress(authProvider.phoneNumber!, address);
         }
 
         Get.back();
