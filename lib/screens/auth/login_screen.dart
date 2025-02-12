@@ -109,7 +109,7 @@ class LoginScreen extends StatelessWidget {
                                       ScaffoldMessenger.of(scaffoldContext)
                                           .showSnackBar(
                                         const SnackBar(
-                                          content: Text('Failed to send OTP'),
+                                          content: Text('Failed to send OTP try after 30 min'),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
@@ -119,7 +119,7 @@ class LoginScreen extends StatelessWidget {
                                     ScaffoldMessenger.of(Get.context!)
                                         .showSnackBar(
                                       const SnackBar(
-                                        content: Text('Failed to send OTP'),
+                                        content: Text('Failed to send OTP try after 30 min'),
                                         backgroundColor: Colors.red,
                                       ),
                                     );
