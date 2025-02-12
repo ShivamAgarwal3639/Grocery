@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBq-GmK0Usd_3Y1zbCNZcY_Emt7TLAR5jM',
-    appId: '1:59058153400:android:b87daa3009d13cbab5d14d',
+    appId: '1:59058153400:android:e02646cd77514806b5d14d',
     messagingSenderId: '59058153400',
     projectId: 'grocerry-85eb0',
     storageBucket: 'grocerry-85eb0.firebasestorage.app',
@@ -59,7 +59,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCjehB67oWgWoGUwqL8utbapLRaEkJOrmE',
-    appId: '1:59058153400:ios:645a67fc81036f8cb5d14d',
+    appId: '1:59058153400:ios:a8574f3475c95488b5d14d',
     messagingSenderId: '59058153400',
     projectId: 'grocerry-85eb0',
     storageBucket: 'grocerry-85eb0.firebasestorage.app',

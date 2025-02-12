@@ -7,7 +7,26 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:59058153400:android:b87daa3009d13cbab5d14d",
+        "mobilesdk_app_id": "1:59058153400:android:018909821f67f8c5b5d14d",
+        "android_client_info": {
+          "package_name": "com.super96.dashboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBq-GmK0Usd_3Y1zbCNZcY_Emt7TLAR5jM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:59058153400:android:e02646cd77514806b5d14d",
         "android_client_info": {
           "package_name": "com.super96.store"
         }
