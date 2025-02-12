@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:59058153400:android:400ebe81ead48a97b5d14d",
+        "mobilesdk_app_id": "1:59058153400:android:b87daa3009d13cbab5d14d",
         "android_client_info": {
-          "package_name": "in.super96.store"
+          "package_name": "com.super96.store"
         }
       },
       "oauth_client": [],
