@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:grocerry/models/cart_model.dart';
+import 'package:Super96Store/models/cart_model.dart';
 import '../models/order_model.dart';
 
 class OrderService {

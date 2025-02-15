@@ -1,7 +1,7 @@
-import 'package:grocerry/models/cart_model.dart';
-import 'package:grocerry/models/promotion_model.dart';
-import 'package:grocerry/models/user_model.dart';
-import 'package:grocerry/models/tax_delivery_model.dart';
+import 'package:Super96Store/models/cart_model.dart';
+import 'package:Super96Store/models/promotion_model.dart';
+import 'package:Super96Store/models/user_model.dart';
+import 'package:Super96Store/models/tax_delivery_model.dart';
 
 class OrderModel {
   final String id;

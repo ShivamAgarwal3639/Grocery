@@ -1,6 +1,6 @@
 // lib/data/dummy_data.dart
-import 'package:grocerry/models/category_model.dart';
-import 'package:grocerry/models/product_model.dart';
+import 'package:Super96Store/models/category_model.dart';
+import 'package:Super96Store/models/product_model.dart';
 
 class DummyData {
   // static List<CategoryModel> categories = [

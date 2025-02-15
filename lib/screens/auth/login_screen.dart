@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:grocerry/notifier/auth_provider.dart';
+import 'package:Super96Store/notifier/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'otp_screen.dart';
 
@@ -114,7 +114,7 @@ class LoginScreen extends StatelessWidget {
                                         ),
                                       );
                                     }
-                                  } else if (context.mounted) {
+                                  } else {
                                     // Check if context is still valid
                                     ScaffoldMessenger.of(Get.context!)
                                         .showSnackBar(

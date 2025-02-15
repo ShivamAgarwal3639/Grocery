@@ -1,9 +1,9 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:grocerry/firebase/user_service.dart';
-import 'package:grocerry/models/user_model.dart';
-import 'package:grocerry/notifier/sms_service.dart';
+import 'package:Super96Store/firebase/user_service.dart';
+import 'package:Super96Store/models/user_model.dart';
+import 'package:Super96Store/notifier/sms_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool isLoading = false;

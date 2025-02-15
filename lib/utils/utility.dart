@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:grocerry/notifier/auth_provider.dart';
+import 'package:Super96Store/notifier/auth_provider.dart';
 import 'package:provider/provider.dart';
 
 class Utility {

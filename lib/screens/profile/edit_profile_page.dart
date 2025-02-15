@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:grocerry/firebase/user_service.dart';
-import 'package:grocerry/models/user_model.dart';
-import 'package:grocerry/notifier/auth_provider.dart';
+import 'package:Super96Store/firebase/user_service.dart';
+import 'package:Super96Store/models/user_model.dart';
+import 'package:Super96Store/notifier/auth_provider.dart';
 import 'package:provider/provider.dart';
 
 class EditProfilePage extends StatefulWidget {

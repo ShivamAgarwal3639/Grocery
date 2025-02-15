@@ -1,15 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:grocerry/firebase/tax_delivery_service.dart';
-import 'package:grocerry/models/cart_model.dart';
-import 'package:grocerry/models/promotion_model.dart';
-import 'package:grocerry/models/tax_delivery_model.dart';
-import 'package:grocerry/notifier/address_provider.dart';
-import 'package:grocerry/notifier/cart_notifier.dart';
-import 'package:grocerry/screens/checkout_page.dart';
+import 'package:Super96Store/firebase/tax_delivery_service.dart';
+import 'package:Super96Store/models/cart_model.dart';
+import 'package:Super96Store/models/promotion_model.dart';
+import 'package:Super96Store/models/tax_delivery_model.dart';
+import 'package:Super96Store/notifier/address_provider.dart';
+import 'package:Super96Store/notifier/cart_notifier.dart';
+import 'package:Super96Store/screens/checkout_page.dart';
 import 'package:provider/provider.dart';
-import 'package:grocerry/widgets/cart_button.dart';
+import 'package:Super96Store/widgets/cart_button.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class CartPage extends StatefulWidget {

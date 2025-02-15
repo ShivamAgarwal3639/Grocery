@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:grocerry/screens/main_pages/cart_page.dart';
-import 'package:grocerry/screens/main_pages/categories_page.dart';
-import 'package:grocerry/screens/main_pages/product_screen.dart';
+import 'package:Super96Store/screens/main_pages/cart_page.dart';
+import 'package:Super96Store/screens/main_pages/categories_page.dart';
+import 'package:Super96Store/screens/main_pages/product_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

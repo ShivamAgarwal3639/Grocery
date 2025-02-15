@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:grocerry/models/user_model.dart';
-import 'package:grocerry/notifier/address_provider.dart';
-import 'package:grocerry/notifier/auth_provider.dart';
-import 'package:grocerry/screens/profile/edit_address_page.dart';
+import 'package:Super96Store/models/user_model.dart';
+import 'package:Super96Store/notifier/address_provider.dart';
+import 'package:Super96Store/notifier/auth_provider.dart';
+import 'package:Super96Store/screens/profile/edit_address_page.dart';
 import 'package:provider/provider.dart';
 
 class AddressListPage extends StatefulWidget {

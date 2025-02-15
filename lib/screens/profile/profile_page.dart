@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
-import 'package:grocerry/firebase/storage/user_profile.dart';
-import 'package:grocerry/firebase/user_service.dart';
-import 'package:grocerry/models/user_model.dart';
-import 'package:grocerry/notifier/auth_provider.dart';
-import 'package:grocerry/screens/auth/login_screen.dart';
-import 'package:grocerry/screens/order_list_page.dart';
-import 'package:grocerry/screens/profile/address_screen.dart';
-import 'package:grocerry/screens/profile/edit_profile_page.dart';
+import 'package:Super96Store/firebase/storage/user_profile.dart';
+import 'package:Super96Store/firebase/user_service.dart';
+import 'package:Super96Store/models/user_model.dart';
+import 'package:Super96Store/notifier/auth_provider.dart';
+import 'package:Super96Store/screens/auth/login_screen.dart';
+import 'package:Super96Store/screens/order_list_page.dart';
+import 'package:Super96Store/screens/profile/address_screen.dart';
+import 'package:Super96Store/screens/profile/edit_profile_page.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {

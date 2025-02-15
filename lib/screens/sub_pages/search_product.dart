@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:grocerry/firebase/product_servide.dart';
-import 'package:grocerry/models/product_model.dart';
-import 'package:grocerry/notifier/cart_notifier.dart';
-import 'package:grocerry/screens/product_detail_page.dart';
+import 'package:Super96Store/firebase/product_servide.dart';
+import 'package:Super96Store/models/product_model.dart';
+import 'package:Super96Store/notifier/cart_notifier.dart';
+import 'package:Super96Store/screens/product_detail_page.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
-import 'package:grocerry/firebase/user_service.dart';
+import 'package:Super96Store/firebase/user_service.dart';
 
 class StorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;

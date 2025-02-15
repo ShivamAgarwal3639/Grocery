@@ -1,13 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:grocerry/firebase/category_service.dart';
-import 'package:grocerry/firebase/product_servide.dart';
-import 'package:grocerry/models/category_model.dart';
-import 'package:grocerry/models/product_model.dart';
-import 'package:grocerry/screens/sub_pages/category_items.dart';
-import 'package:grocerry/screens/sub_pages/search_product.dart';
-import 'package:grocerry/utils/color.dart';
+import 'package:Super96Store/firebase/category_service.dart';
+import 'package:Super96Store/firebase/product_servide.dart';
+import 'package:Super96Store/models/category_model.dart';
+import 'package:Super96Store/models/product_model.dart';
+import 'package:Super96Store/screens/sub_pages/category_items.dart';
+import 'package:Super96Store/screens/sub_pages/search_product.dart';
+import 'package:Super96Store/utils/color.dart';
 import '../profile/profile_page.dart';
 
 class CategoriesPage extends StatefulWidget {

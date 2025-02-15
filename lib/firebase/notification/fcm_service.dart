@@ -1,6 +1,6 @@
 import 'dart:developer';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:grocerry/firebase/notification/notification_service.dart';
+import 'package:Super96Store/firebase/notification/notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class FCMService {

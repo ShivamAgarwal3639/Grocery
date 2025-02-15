@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:grocerry/notifier/auth_provider.dart';
-import 'package:grocerry/screens/auth/home_screen.dart';
+import 'package:Super96Store/notifier/auth_provider.dart';
+import 'package:Super96Store/screens/auth/home_screen.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
@@ -62,7 +62,7 @@ class _OTPScreenState extends State<OTPScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to resend OTP'),
+          content: Text('Failed to resend OTP try after 30 min'),
           backgroundColor: Colors.red,
         ),
       );
@@ -104,17 +104,17 @@ class _OTPScreenState extends State<OTPScreen> {
                 Text(
                   'Verification Code',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Enter the 6-digit code sent to your phone',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                        color: Colors.grey[600],
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
@@ -159,21 +159,21 @@ class _OTPScreenState extends State<OTPScreen> {
                 Center(
                   child: _canResend
                       ? TextButton(
-                    onPressed: _resendOTP,
-                    child: Text(
-                      'Resend OTP',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  )
+                          onPressed: _resendOTP,
+                          child: Text(
+                            'Resend OTP',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )
                       : Text(
-                    'Resend OTP in $_remainingTime seconds',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                    ),
-                  ),
+                          'Resend OTP in $_remainingTime seconds',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                          ),
+                        ),
                 ),
               ],
             ),

@@ -1,6 +1,6 @@
 // address_provider.dart
 import 'package:flutter/material.dart';
-import 'package:grocerry/firebase/user_service.dart';
+import 'package:Super96Store/firebase/user_service.dart';
 import '../models/user_model.dart';
 
 class AddressProvider extends ChangeNotifier {

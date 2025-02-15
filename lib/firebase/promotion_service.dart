@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:grocerry/models/promotion_model.dart';
+import 'package:Super96Store/models/promotion_model.dart';
 
 class PromotionService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

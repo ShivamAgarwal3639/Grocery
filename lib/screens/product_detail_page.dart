@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:grocerry/notifier/cart_notifier.dart';
-import 'package:grocerry/screens/main_pages/cart_page.dart';
+import 'package:Super96Store/notifier/cart_notifier.dart';
+import 'package:Super96Store/screens/main_pages/cart_page.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:grocerry/models/product_model.dart';
+import 'package:Super96Store/models/product_model.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final ProductModel product;

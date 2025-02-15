@@ -1,4 +1,4 @@
-import 'package:grocerry/models/product_model.dart';
+import 'package:Super96Store/models/product_model.dart';
 
 enum OrderStatus { pending, confirmed, processing, shipped, delivered, cancelled }
 

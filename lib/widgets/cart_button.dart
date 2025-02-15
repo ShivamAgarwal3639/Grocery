@@ -1,8 +1,8 @@
 // cart_button.dart
 import 'package:flutter/material.dart';
-import 'package:grocerry/notifier/cart_notifier.dart';
+import 'package:Super96Store/notifier/cart_notifier.dart';
 import 'package:provider/provider.dart';
-import 'package:grocerry/models/product_model.dart';
+import 'package:Super96Store/models/product_model.dart';
 
 class AddToCartButton extends StatelessWidget {
   final ProductModel product;

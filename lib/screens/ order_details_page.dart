@@ -1,11 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:grocerry/firebase/tax_delivery_service.dart';
-import 'package:grocerry/models/tax_delivery_model.dart';
+import 'package:Super96Store/firebase/tax_delivery_service.dart';
+import 'package:Super96Store/models/tax_delivery_model.dart';
 import 'package:intl/intl.dart';
-import 'package:grocerry/models/cart_model.dart';
-import 'package:grocerry/models/order_model.dart';
+import 'package:Super96Store/models/cart_model.dart';
+import 'package:Super96Store/models/order_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class OrderDetailsPage extends StatelessWidget {

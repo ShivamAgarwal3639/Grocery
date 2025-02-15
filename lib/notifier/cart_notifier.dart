@@ -1,8 +1,8 @@
 // cart_notifier.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:grocerry/models/cart_model.dart';
-import 'package:grocerry/models/product_model.dart';
+import 'package:Super96Store/models/cart_model.dart';
+import 'package:Super96Store/models/product_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CartNotifier extends ChangeNotifier {

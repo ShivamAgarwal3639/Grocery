@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:grocerry/main.dart';
+import 'package:Super96Store/main.dart';
 
 class ServiceUnavailablePage extends StatelessWidget {
   const ServiceUnavailablePage({super.key});

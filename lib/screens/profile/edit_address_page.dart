@@ -3,11 +3,11 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:grocerry/firebase/tax_delivery_service.dart';
-import 'package:grocerry/models/tax_delivery_model.dart';
-import 'package:grocerry/models/user_model.dart';
-import 'package:grocerry/notifier/address_provider.dart';
-import 'package:grocerry/notifier/auth_provider.dart';
+import 'package:Super96Store/firebase/tax_delivery_service.dart';
+import 'package:Super96Store/models/tax_delivery_model.dart';
+import 'package:Super96Store/models/user_model.dart';
+import 'package:Super96Store/notifier/address_provider.dart';
+import 'package:Super96Store/notifier/auth_provider.dart';
 import 'package:provider/provider.dart';
 
 class AddEditAddressPage extends StatefulWidget {
