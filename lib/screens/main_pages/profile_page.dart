@@ -28,22 +28,22 @@ class ProfileController extends GetxController {
     }
   }
 
-  Future<void> logout() async {
-    try {
-      isLoading.value = true;
-      await Future.delayed(const Duration(seconds: 1));
-
-      Get.offAll(() => LoginScreen());
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to logout',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  // Future<void> logout() async {
+  //   try {
+  //     isLoading.value = true;
+  //     await Future.delayed(const Duration(seconds: 1));
+  //
+  //     Get.offAll(() => LoginScreen());
+  //   } catch (e) {
+  //     Get.snackbar(
+  //       'Error',
+  //       'Failed to logout',
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       backgroundColor: Colors.red,
+  //       colorText: Colors.white,
+  //     );
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
 }

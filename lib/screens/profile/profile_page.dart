@@ -1,3 +1,4 @@
+import 'package:Super96Store/utils/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
@@ -21,7 +22,6 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final UserService _userService = UserService();
   final authProvider = Provider.of<AuthProvider>(Get.context!, listen: false);
-
 
   final StorageService _storageService = StorageService();
   bool _isUploading = false;
@@ -72,7 +72,8 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
       // Upload image
-      await _storageService.uploadProfileImage(authProvider.phoneNumber!, imageFile);
+      await _storageService.uploadProfileImage(
+          authProvider.phoneNumber!, imageFile);
 
       // Close progress dialog
       if (!mounted) return;
@@ -411,6 +412,7 @@ class _ProfilePageState extends State<ProfilePage> {
               try {
                 final authProvider =
                     Provider.of<AuthProvider>(context, listen: false);
+                Utility.logout(authProvider.phoneNumber);
                 await authProvider.signOut();
                 Get.offAll(() => LoginScreen());
               } catch (e) {

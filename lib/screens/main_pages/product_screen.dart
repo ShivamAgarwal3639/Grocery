@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Super96Store/firebase/category_service.dart';
@@ -31,32 +32,6 @@ class _ProductsPageState extends State<ProductsPage> {
   final ScrollController _scrollController = ScrollController();
   final PromotionService _promotionService = PromotionService();
 
-  final List<Map<String, dynamic>> _promotions = [
-    {
-      'discount': '25% OFF',
-      'title': 'Fresh Vegetables',
-      'subtitle': 'Get free delivery today',
-      'color1': Color(0xFF4CAF50),
-      'color2': Color(0xFF81C784),
-      'asset': 'assets/vegetables.png',
-    },
-    {
-      'discount': '30% OFF',
-      'title': 'Fresh Fruits',
-      'subtitle': 'Weekend special offer',
-      'color1': Color(0xFFFF7043),
-      'color2': Color(0xFFFFAB91),
-      'asset': 'assets/fruits.png',
-    },
-    {
-      'discount': '20% OFF',
-      'title': 'Dairy Products',
-      'subtitle': 'Limited time offer',
-      'color1': Color(0xFF42A5F5),
-      'color2': Color(0xFF90CAF9),
-      'asset': 'assets/dairy.png',
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -521,7 +496,7 @@ class _ProductsPageState extends State<ProductsPage> {
             crossAxisCount: crossAxisCount,
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
-            childAspectRatio: 0.80, // Adjusted for better content fit
+            childAspectRatio: 0.75, // Adjusted for better content fit
           ),
           itemCount: products.length,
           itemBuilder: (context, index) =>
@@ -605,6 +580,8 @@ class _ProductsPageState extends State<ProductsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 2),
+
                     Text(
                       product.name,
                       style: const TextStyle(
@@ -614,7 +591,8 @@ class _ProductsPageState extends State<ProductsPage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+
+                    const SizedBox(height: 2),
                     Flexible(
                       child: Text(
                         product.description,
@@ -645,7 +623,7 @@ class _ProductsPageState extends State<ProductsPage> {
                                   ),
                                 ),
                               Text(
-                                '₹${(product.discountPrice ?? product.price).toStringAsFixed(2)}',
+                                '₹${(product.discountPrice ?? product.price).toStringAsFixed(0)}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,

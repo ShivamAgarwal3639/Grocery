@@ -201,6 +201,14 @@ class OrderDetailsPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
+                            item.product.formattedUnit,
+                            style: TextStyle(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
                             '${item.quantity}x @ ₹${item.price.toStringAsFixed(2)}',
                             style: TextStyle(
                               fontSize: 13,

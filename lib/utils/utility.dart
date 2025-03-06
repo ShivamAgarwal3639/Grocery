@@ -8,7 +8,7 @@ class Utility {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
-  static Future<void> _updateUserFCMToken(String phoneNumber) async {
+  static Future<void> _updateUserFCMToken(String phoneNumber, bool data) async {
     try {
       // Get the current FCM token
       String? token = await _messaging.getToken();
@@ -16,13 +16,20 @@ class Utility {
       if (token != null) {
         // Update the token in Firestore using phone number as document ID
         await _firestore.collection('users').doc(phoneNumber).update({
-          'fcmTokens': token,
+          'fcmTokens': data?token: null,
         });
       }
     } catch (e) {
       debugPrint('Error updating FCM token: $e');
     }
   }
+
+  static void logout(phoneNumber)async{
+    await _firestore.collection('users').doc(phoneNumber).update({
+      'fcmTokens':  null,
+    });
+  }
+
 
   static void initialize(BuildContext context) {
     // Get AuthProvider instance
@@ -32,7 +39,10 @@ class Utility {
     authProvider.addListener(() {
       if (authProvider.isAuthenticated && authProvider.phoneNumber != null) {
         // User is authenticated, update their FCM token
-        _updateUserFCMToken(authProvider.phoneNumber!);
+        _updateUserFCMToken(authProvider.phoneNumber!, true);
+      }
+      else{
+        _updateUserFCMToken(authProvider.phoneNumber!, false);
       }
     });
 

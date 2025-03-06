@@ -158,7 +158,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
-  // Rest of the code remains the same...
   Widget _buildProductInfo(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -208,6 +207,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   'Out of Stock',
                   style: TextStyle(color: Colors.red),
                 ),
+              const SizedBox(width: 10),
+              // Add the unit information here
+              Text(
+                widget.product.formattedUnit,
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ],
           ),
         ],
@@ -285,7 +293,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             top: 0,
                             child: Container(
                               padding: const EdgeInsets.all(4),
-                              decoration:  BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: Colors.green[700],
                                 shape: BoxShape.circle,
                               ),
@@ -306,7 +314,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             vertical: 9, horizontal: 0),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
-                        side:  BorderSide(color: Colors.green),
+                        side: BorderSide(color: Colors.green),
                       ),
                     ),
                   ),
@@ -350,7 +358,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ] else
                   Expanded(
                     child: ElevatedButton(
-
                       onPressed: widget.product.inStock
                           ? () {
                         cartNotifier.addToCart(widget.product);

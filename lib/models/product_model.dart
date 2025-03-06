@@ -1,10 +1,18 @@
+import 'package:flutter/foundation.dart';
+
+enum ProductUnit {
+  kg,
+  grams,
+  pieces,
+}
+
 class ProductModel {
   final String id;
   final String name;
   final String description;
   final double price;
   final double? discountPrice;
-  final List<String> imageUrls; // Changed from single imageUrl to list
+  final List<String> imageUrls;
   final String categoryId;
   final bool inStock;
   final int stockQuantity;
@@ -13,13 +21,17 @@ class ProductModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  // New fields for unit specification
+  final ProductUnit unit;
+  final double unitValue;
+
   ProductModel({
     required this.id,
     required this.name,
     required this.description,
     required this.price,
     this.discountPrice,
-    required this.imageUrls, // Changed parameter
+    required this.imageUrls,
     required this.categoryId,
     this.inStock = true,
     this.stockQuantity = 0,
@@ -27,6 +39,8 @@ class ProductModel {
     this.tags = const [],
     required this.createdAt,
     required this.updatedAt,
+    this.unit = ProductUnit.pieces,
+    this.unitValue = 1,
   });
 
   factory ProductModel.fromMap(Map<String, dynamic> map) {
@@ -36,7 +50,7 @@ class ProductModel {
       description: map['description']?.toString() ?? '',
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
       discountPrice: (map['discountPrice'] as num?)?.toDouble(),
-      imageUrls: List<String>.from(map['imageUrls'] ?? []), // Changed from imageUrl
+      imageUrls: List<String>.from(map['imageUrls'] ?? []),
       categoryId: map['categoryId']?.toString() ?? '',
       inStock: map['inStock'] ?? true,
       stockQuantity: map['stockQuantity']?.toInt() ?? 0,
@@ -48,6 +62,12 @@ class ProductModel {
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'].toString())
           : DateTime.now(),
+      // Parse unit information
+      unit: map['unit'] != null
+          ? ProductUnit.values.firstWhere((e) => describeEnum(e) == map['unit'],
+              orElse: () => ProductUnit.pieces)
+          : ProductUnit.pieces,
+      unitValue: (map['unitValue'] as num?)?.toDouble() ?? 1,
     );
   }
 
@@ -58,7 +78,7 @@ class ProductModel {
       'description': description,
       'price': price,
       'discountPrice': discountPrice,
-      'imageUrls': imageUrls, // Changed from imageUrl
+      'imageUrls': imageUrls,
       'categoryId': categoryId,
       'inStock': inStock,
       'stockQuantity': stockQuantity,
@@ -66,6 +86,9 @@ class ProductModel {
       'tags': tags,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      // Add unit information to map
+      'unit': describeEnum(unit),
+      'unitValue': unitValue,
     };
   }
 
@@ -75,7 +98,7 @@ class ProductModel {
     String? description,
     double? price,
     double? discountPrice,
-    List<String>? imageUrls, // Changed parameter
+    List<String>? imageUrls,
     String? categoryId,
     bool? inStock,
     int? stockQuantity,
@@ -83,6 +106,8 @@ class ProductModel {
     List<String>? tags,
     DateTime? createdAt,
     DateTime? updatedAt,
+    ProductUnit? unit,
+    double? unitValue,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -98,6 +123,20 @@ class ProductModel {
       tags: tags ?? this.tags,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      unit: unit ?? this.unit,
+      unitValue: unitValue ?? this.unitValue,
     );
+  }
+
+  // Helper method to get formatted unit string
+  String get formattedUnit {
+    switch (unit) {
+      case ProductUnit.kg:
+        return '${unitValue.toInt()} kg';
+      case ProductUnit.grams:
+        return '${unitValue.toInt()} g';
+      case ProductUnit.pieces:
+        return '${unitValue.toInt()} pc';
+    }
   }
 }
