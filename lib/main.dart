@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
       ],
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Phone Auth App',
+        title: 'Super96 Store',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           brightness: Brightness.light,
@@ -83,7 +83,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
   void initState() {
     super.initState();
     _initializeRemoteConfig();
-    Utility.initialize(context);
   }
 
   Future<void> _initializeRemoteConfig() async {

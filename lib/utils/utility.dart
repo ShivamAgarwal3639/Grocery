@@ -8,7 +8,7 @@ class Utility {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
-  static Future<void> _updateUserFCMToken(String phoneNumber, bool data) async {
+  static Future<void> _updateUserFCMToken(String phoneNumber) async {
     try {
       // Get the current FCM token
       String? token = await _messaging.getToken();
@@ -16,7 +16,7 @@ class Utility {
       if (token != null) {
         // Update the token in Firestore using phone number as document ID
         await _firestore.collection('users').doc(phoneNumber).update({
-          'fcmTokens': data?token: null,
+          'fcmTokens': token,
         });
       }
     } catch (e) {
@@ -24,35 +24,28 @@ class Utility {
     }
   }
 
-  static void logout(phoneNumber)async{
+  static void logout(phoneNumber) async {
     await _firestore.collection('users').doc(phoneNumber).update({
-      'fcmTokens':  null,
+      'fcmTokens': null,
     });
   }
 
-
   static void initialize(BuildContext context) {
-    // Get AuthProvider instance
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.phoneNumber != null) {
+      _updateUserFCMToken(authProvider.phoneNumber!);
 
-    // Listen to authentication state changes
-    authProvider.addListener(() {
-      if (authProvider.isAuthenticated && authProvider.phoneNumber != null) {
-        // User is authenticated, update their FCM token
-        _updateUserFCMToken(authProvider.phoneNumber!, true);
-      }
-      else{
-        _updateUserFCMToken(authProvider.phoneNumber!, false);
-      }
-    });
-
-    // Handle FCM token refresh
-    _messaging.onTokenRefresh.listen((String token) async {
-      if (authProvider.isAuthenticated && authProvider.phoneNumber != null) {
-        await _firestore.collection('users').doc(authProvider.phoneNumber!).update({
-          'fcmTokens': token,
-        });
-      }
-    });
+      // Handle FCM token refresh
+      _messaging.onTokenRefresh.listen((String token) async {
+        if (authProvider.isAuthenticated && authProvider.phoneNumber != null) {
+          await _firestore
+              .collection('users')
+              .doc(authProvider.phoneNumber!)
+              .update({
+            'fcmTokens': token,
+          });
+        }
+      });
+    }
   }
 }

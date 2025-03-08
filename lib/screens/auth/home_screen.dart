@@ -1,3 +1,4 @@
+import 'package:Super96Store/utils/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:Super96Store/screens/main_pages/cart_page.dart';
 import 'package:Super96Store/screens/main_pages/categories_page.dart';
@@ -17,6 +18,12 @@ class _HomeScreenState extends State<HomeScreen> {
     const CategoriesPage(),
     const CartPage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    Utility.initialize(context);
+  }
 
   @override
   Widget build(BuildContext context) {

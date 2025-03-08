@@ -5,6 +5,7 @@ import 'package:Super96Store/firebase/user_service.dart';
 import 'package:Super96Store/models/user_model.dart';
 import 'package:Super96Store/notifier/sms_service.dart';
 
+
 class AuthProvider extends ChangeNotifier {
   bool isLoading = false;
   String? _phoneNumber;
@@ -22,10 +23,10 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final otp = await AuthService.sendOTP(phoneNumber);
-
-      return otp != null;
+      final responseData = await AuthService.sendOTP(phoneNumber);
+      return responseData != null;
     } catch (e) {
+      log('Error in sendOTP: $e');
       return false;
     } finally {
       isLoading = false;
@@ -38,7 +39,10 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      log('Attempting to verify OTP: $otp for phone: $phoneNumber');
       final success = await AuthService.verifyOTP(otp, phoneNumber);
+      log('OTP verification result: $success');
+
       if (success) {
         _phoneNumber = phoneNumber;
         UserService userService = UserService();
@@ -53,6 +57,7 @@ class AuthProvider extends ChangeNotifier {
       }
       return success;
     } catch (e) {
+      log('Error in verifyOTP: $e');
       return false;
     } finally {
       isLoading = false;

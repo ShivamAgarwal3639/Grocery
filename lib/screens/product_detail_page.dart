@@ -1,3 +1,4 @@
+import 'package:Super96Store/screens/image_viewer_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Super96Store/notifier/cart_notifier.dart';
@@ -74,9 +75,20 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               itemBuilder: (context, index) {
                 return Hero(
                   tag: 'product-${widget.product.id}',
-                  child: CachedNetworkImage(
-                    imageUrl: widget.product.imageUrls[index],
-                    fit: BoxFit.cover,
+                  child: Material(
+                    // Add this Material widget
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        Get.to(() => ImageViewerPage(
+                            imageUrls: widget.product.imageUrls,
+                            initialIndex: _currentImageIndex));
+                      },
+                      child: CachedNetworkImage(
+                        imageUrl: widget.product.imageUrls[index],
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 );
               },
@@ -171,8 +183,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 child: Text(
                   widget.product.name,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ),
               if (widget.product.discountPrice != null) ...[
@@ -188,9 +200,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               Text(
                 '₹${(widget.product.discountPrice ?? widget.product.price).toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),
@@ -360,15 +372,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     child: ElevatedButton(
                       onPressed: widget.product.inStock
                           ? () {
-                        cartNotifier.addToCart(widget.product);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                            Text('${widget.product.name} added to cart'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      }
+                              cartNotifier.addToCart(widget.product);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      '${widget.product.name} added to cart'),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green[700],

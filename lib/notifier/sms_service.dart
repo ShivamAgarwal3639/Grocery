@@ -1,60 +1,100 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:developer' as dev;
 
 class AuthService {
-  static const String _baseUrl = 'https://www.fast2sms.com/dev/bulkV2';
-  static const String _authKey = 'YDFVdicuTZNfHqgxBmwsRXL96eSJ4zktWnyaQpKA8orC7I3l12DA9gXs6OQVkl8zRiGyjmEa3b01SHe4';
+  static const String _baseUrlSend =
+      'https://cpaas.messagecentral.com/verification/v3/send';
+  static const String _baseUrlValidate =
+      'https://cpaas.messagecentral.com/verification/v3/validateOtp';
+  static const String _authToken =
+      'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJDLTBENjk4Q0FFRjkxNTQwQyIsImlhdCI6MTczOTY0NzQ3MCwiZXhwIjoxODk3MzI3NDcwfQ.y8b7-y9YNulE186IwBe2hLSUIrZ43vJXgRfbp3HWZozIdDWuIyjS9dx-dAOmU3vZ2A0y3V9Apdi0haPc9xyknA';
+  static const String _customerId = 'C-0D698CAEF91540C';
   static const _storage = FlutterSecureStorage();
 
-  static String _generateOTP() {
-    Random random = Random();
-    return List.generate(6, (_) => random.nextInt(10)).join();
-  }
-
-  static Future<String?> sendOTP(String phoneNumber) async {
+  static Future<Map<String, dynamic>?> sendOTP(String phoneNumber) async {
     try {
-      final otp = _generateOTP();
+      final String url =
+          '$_baseUrlSend?countryCode=91&customerId=$_customerId&flowType=SMS&mobileNumber=$phoneNumber';
 
       final response = await http.post(
-        Uri.parse(_baseUrl),
+        Uri.parse(url),
         headers: {
-          'authorization': _authKey,
+          'authToken': _authToken,
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'route': 'otp',
-          'variables_values': otp,
-          'numbers': phoneNumber,
-        }),
       );
 
-      dev.log("_-------------------------------${response.body}");
+      dev.log("OTP Send Response: ${response.body}");
 
       if (response.statusCode == 200) {
-        await _storage.write(key: 'pending_otp', value: otp);
-        return otp;
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+        if (responseData['responseCode'] == 200 &&
+            responseData['message'] == 'SUCCESS') {
+          // Store the verification ID for later validation
+          final verificationId =
+          responseData['data']['verificationId']; // ✅ Correct key
+          dev.log("Storing verification ID: $verificationId");
+          await _storage.write(
+              key: 'verification_id', value: verificationId.toString());
+          return responseData['data'];
+        }
       }
+      dev.log("Failed to send OTP: ${response.statusCode} - ${response.body}");
       return null;
     } catch (e) {
-      print('Error sending OTP: $e');
+      dev.log('Error sending OTP: $e');
       return null;
     }
   }
 
   static Future<bool> verifyOTP(String userOTP, String phoneNumber) async {
     try {
-      final storedOTP = await _storage.read(key: 'pending_otp');
-      if (storedOTP == userOTP) {
-        await _storage.delete(key: 'pending_otp');
-        await _storage.write(key: 'phone_number', value: phoneNumber);
-        return true;
+      final verificationId = await _storage.read(key: 'verification_id');
+
+      if (verificationId == null) {
+        dev.log('Verification ID not found in storage');
+        return false;
+      }
+
+      dev.log('Retrieved verification ID: $verificationId for validation');
+
+      final String url =
+          '$_baseUrlValidate?countryCode=91&mobileNumber=$phoneNumber&verificationId=$verificationId&customerId=$_customerId&code=$userOTP';
+
+      dev.log("Validating OTP with URL: $url");
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'authToken': _authToken,
+        },
+      );
+
+      dev.log("OTP Verify Response Status: ${response.statusCode}");
+      dev.log("OTP Verify Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+        if (responseData['responseCode'] == 200 &&
+            responseData['message'] == 'SUCCESS' &&
+            responseData['data']['verificationStatus'] ==
+                'VERIFICATION_COMPLETED') {
+          await _storage.delete(key: 'verification_id');
+          await _storage.write(key: 'phone_number', value: phoneNumber);
+          return true;
+        }
+        dev.log("Validation failed: ${responseData['message']}");
+      } else {
+        dev.log(
+            "Validation error: ${response.reasonPhrase} - ${response.body}");
       }
       return false;
     } catch (e) {
-      print('Error verifying OTP: $e');
+      dev.log('Error verifying OTP: $e');
       return false;
     }
   }
@@ -65,5 +105,6 @@ class AuthService {
 
   static Future<void> signOut() async {
     await _storage.delete(key: 'phone_number');
+    await _storage.delete(key: 'verification_id');
   }
 }
