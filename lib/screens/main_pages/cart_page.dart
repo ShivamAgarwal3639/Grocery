@@ -1,3 +1,4 @@
+import 'package:Super96Store/screens/auth/home_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -492,7 +493,7 @@ class _CartPageState extends State<CartPage> {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => Get.back(),
+            onPressed: () =>     Get.offAll(() => const HomeScreen(), arguments: 0),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green[700],
               foregroundColor: Colors.white,

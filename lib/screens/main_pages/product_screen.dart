@@ -139,7 +139,7 @@ class _ProductsPageState extends State<ProductsPage> {
               size: 30, color: Colors.green[700]),
           const SizedBox(width: 8),
           Text(
-            'GroCart',
+            'Super96',
             style: TextStyle(
               color: Colors.grey[800],
               fontWeight: FontWeight.w600,
