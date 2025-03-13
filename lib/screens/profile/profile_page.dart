@@ -225,10 +225,21 @@ class _ProfilePageState extends State<ProfilePage> {
                             width: 120,
                             height: 120,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) =>
-                                const CircularProgressIndicator(),
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.person, size: 60),
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[200],
+                        child:  Center(
+                          child: SizedBox(
+                            width: 120,
+                            height: 120,
+                            child: Image.asset('assets/default_image_product.png',  fit: BoxFit.cover,),
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[200],
+                        child: Icon(Icons.error_outline,
+                            color: Colors.grey[400]),
+                      ),
                           )
                         : const Icon(Icons.person,
                             size: 60, color: Colors.grey),

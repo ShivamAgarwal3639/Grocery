@@ -269,22 +269,16 @@ class _CategoriesPageState extends State<CategoriesPage> {
                         fit: BoxFit.fill,
                         placeholder: (context, url) => Container(
                           color: Colors.grey[200],
-                          child: const Center(
+                          child:  Center(
                             child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: Image.asset('assets/default_image_product.png',  fit: BoxFit.fill,),
                             ),
                           ),
                         ),
                         errorWidget: (context, url, error) => Container(
                           color: Colors.grey[200],
-                          child: const Icon(
-                            Icons.error_outline,
-                            color: Colors.grey,
-                          ),
+                          child: Icon(Icons.error_outline,
+                              color: Colors.grey[400]),
                         ),
                       ),
                     ),

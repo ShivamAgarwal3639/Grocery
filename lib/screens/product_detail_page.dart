@@ -162,16 +162,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     fit: BoxFit.contain,
                     placeholder: (context, url) => Container(
                       color: Colors.grey[200],
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.green),
+                      child:  Center(
+                        child: SizedBox(
+                          child: Image.asset('assets/default_image_product.png',  fit: BoxFit.contain,),
                         ),
                       ),
                     ),
                     errorWidget: (context, url, error) => Container(
                       color: Colors.grey[200],
-                      child: const Icon(Icons.error),
+                      child: Icon(Icons.error_outline,
+                          color: Colors.grey[400]),
                     ),
                   ),
                 );
@@ -269,6 +269,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 child: CachedNetworkImage(
                   imageUrl: widget.product.imageUrls[index],
                   fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey[200],
+                    child:  Center(
+                      child: SizedBox(
+                        child: Image.asset('assets/default_image_product.png',  fit: BoxFit.cover,),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.grey[200],
+                    child: Icon(Icons.error_outline,
+                        color: Colors.grey[400]),
+                  ),
                 ),
               ),
             ),

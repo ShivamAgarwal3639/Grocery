@@ -254,13 +254,20 @@ class _SearchPageState extends State<SearchPage> {
                     fit: BoxFit.cover,
                     placeholder: (context, url) => Container(
                       color: Colors.grey[200],
-                      child: const Center(
-                        child: CircularProgressIndicator(),
+                      child: Center(
+                        child: SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: Image.asset(
+                            'assets/default_image_product.png',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     ),
                     errorWidget: (context, url, error) => Container(
                       color: Colors.grey[200],
-                      child: const Icon(Icons.error_outline),
+                      child: Icon(Icons.error_outline, color: Colors.grey[400]),
                     ),
                   ),
                 ),

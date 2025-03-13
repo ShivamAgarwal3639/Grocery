@@ -569,19 +569,18 @@ class _CartPageState extends State<CartPage> {
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
                   color: Colors.grey[200],
-                  child: const Center(
+                  child:  Center(
                     child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
+                      width: 60,
+                      height: 60,
+                      child: Image.asset('assets/default_image_product.png',  fit: BoxFit.cover,),
                     ),
                   ),
                 ),
                 errorWidget: (context, url, error) => Container(
                   color: Colors.grey[200],
-                  child: Icon(Icons.error_outline, color: Colors.grey[400]),
+                  child: Icon(Icons.error_outline,
+                      color: Colors.grey[400]),
                 ),
               ),
             ),

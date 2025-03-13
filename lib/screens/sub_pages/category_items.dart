@@ -267,13 +267,16 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
                           color: Colors.grey[200],
-                          child: const Center(
-                            child: CircularProgressIndicator(),
+                          child:  Center(
+                            child: SizedBox(
+                              child: Image.asset('assets/default_image_product.png',  fit: BoxFit.cover,),
+                            ),
                           ),
                         ),
                         errorWidget: (context, url, error) => Container(
                           color: Colors.grey[200],
-                          child: const Icon(Icons.error_outline),
+                          child: Icon(Icons.error_outline,
+                              color: Colors.grey[400]),
                         ),
                       ),
                     ),
