@@ -37,13 +37,14 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      // backgroundColor: Colors.black12,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 2,
+        backgroundColor: Colors.black12,
+        iconTheme: const IconThemeData(color: Colors.black),
         title: Text(
           '${_currentIndex + 1}/${widget.imageUrls.length}',
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.black),
         ),
       ),
       body: PhotoViewGallery.builder(
@@ -65,7 +66,7 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                 : event.cumulativeBytesLoaded / (event.expectedTotalBytes ?? 1),
           ),
         ),
-        backgroundDecoration: const BoxDecoration(color: Colors.black),
+        backgroundDecoration: const BoxDecoration(color: Colors.black12),
         pageController: _pageController,
         onPageChanged: (index) {
           setState(() {
@@ -80,7 +81,7 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
   Widget _buildThumbnailBar() {
     return Container(
       height: 80,
-      color: Colors.black,
+      color: Colors.black12,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

@@ -35,17 +35,95 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: CircleAvatar(
+            backgroundColor: Colors.grey.withOpacity(0.1),
+            child: Icon(Icons.arrow_back, color: Colors.black),
+          ),
+          onPressed: () => Get.back(),
+        ),
+        actions: [
+          Consumer<CartNotifier>(
+            builder: (context, cartNotifier, _) {
+              final itemCount = cartNotifier.cart.items.length;
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart_outlined,
+                        color: Colors.black),
+                    onPressed: () => Get.to(() => CartPage()),
+                  ),
+                  if (itemCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.green[700],
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          '$itemCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+          // IconButton(
+          //   icon: const Icon(Icons.favorite_border, color: Colors.black),
+          //   onPressed: () {
+          //     ScaffoldMessenger.of(context).showSnackBar(
+          //       const SnackBar(
+          //         content: Text('Added to favorites'),
+          //         behavior: SnackBarBehavior.floating,
+          //       ),
+          //     );
+          //   },
+          // ),
+          // IconButton(
+          //   icon: const Icon(Icons.share, color: Colors.black),
+          //   onPressed: () {
+          //     ScaffoldMessenger.of(context).showSnackBar(
+          //       const SnackBar(
+          //         content: Text('Share feature coming soon'),
+          //         behavior: SnackBarBehavior.floating,
+          //       ),
+          //     );
+          //   },
+          // ),
+        ],
+      ),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            _buildAppBar(context),
             SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildMainImage(),
                   _buildImageCarousel(),
                   _buildProductInfo(context),
+                  const Divider(height: 24),
                   _buildDescription(),
+                  const SizedBox(
+                      height: 80), // Extra space at bottom for scrolling
                 ],
               ),
             ),
@@ -56,15 +134,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
-    return SliverAppBar(
-      expandedHeight: 300,
-      pinned: true,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Stack(
-          children: [
-            // Main image slider
-            PageView.builder(
+  Widget _buildMainImage() {
+    return Stack(
+      children: [
+        Container(
+          height: 350,
+          width: double.infinity,
+          child: Hero(
+            tag: 'product-${widget.product.id}',
+            child: PageView.builder(
               controller: _pageController,
               itemCount: widget.product.imageUrls.length,
               onPageChanged: (index) {
@@ -73,67 +151,88 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 });
               },
               itemBuilder: (context, index) {
-                return Hero(
-                  tag: 'product-${widget.product.id}',
-                  child: Material(
-                    // Add this Material widget
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        Get.to(() => ImageViewerPage(
-                            imageUrls: widget.product.imageUrls,
-                            initialIndex: _currentImageIndex));
-                      },
-                      child: CachedNetworkImage(
-                        imageUrl: widget.product.imageUrls[index],
-                        fit: BoxFit.cover,
+                return GestureDetector(
+                  onTap: () {
+                    Get.to(() => ImageViewerPage(
+                        imageUrls: widget.product.imageUrls,
+                        initialIndex: _currentImageIndex));
+                  },
+                  child: CachedNetworkImage(
+                    imageUrl: widget.product.imageUrls[index],
+                    fit: BoxFit.contain,
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.green),
+                        ),
                       ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.error),
                     ),
                   ),
                 );
               },
             ),
-            // Dot indicators
-            Positioned(
-              bottom: 16,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: widget.product.imageUrls.asMap().entries.map((entry) {
-                  return Container(
-                    width: 8,
-                    height: 8,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _currentImageIndex == entry.key
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.5),
-                    ),
-                  );
-                }).toList(),
+          ),
+        ),
+        // Discount badge
+        if (widget.product.discountPrice != null)
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                '${(((widget.product.price - (widget.product.discountPrice ?? 0)) / widget.product.price) * 100).toInt()}% OFF',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
               ),
             ),
-          ],
+          ),
+        // Dot indicators
+        Positioned(
+          bottom: 16,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: widget.product.imageUrls.asMap().entries.map((entry) {
+              return Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _currentImageIndex == entry.key
+                      ? Colors.green
+                      : Colors.grey.withOpacity(0.5),
+                ),
+              );
+            }).toList(),
+          ),
         ),
-      ),
-      leading: IconButton(
-        icon: const CircleAvatar(
-          backgroundColor: Colors.white,
-          child: Icon(Icons.arrow_back, color: Colors.black),
-        ),
-        onPressed: () => Get.back(),
-      ),
+      ],
     );
   }
 
   Widget _buildImageCarousel() {
-    return SizedBox(
+    return Container(
       height: 100,
+      margin: const EdgeInsets.only(top: 8),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: widget.product.imageUrls.length,
         itemBuilder: (context, index) {
           return GestureDetector(
@@ -146,18 +245,27 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             },
             child: Container(
               width: 80,
-              margin: const EdgeInsets.only(right: 8),
+              margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: _currentImageIndex == index
                       ? Colors.green
                       : Colors.grey[300]!,
                   width: _currentImageIndex == index ? 2 : 1,
                 ),
+                boxShadow: _currentImageIndex == index
+                    ? [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.2),
+                          spreadRadius: 1,
+                          blurRadius: 2,
+                        )
+                      ]
+                    : null,
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
                 child: CachedNetworkImage(
                   imageUrl: widget.product.imageUrls[index],
                   fit: BoxFit.cover,
@@ -176,56 +284,85 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  widget.product.name,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+          // Product name and price
+          Text(
+            widget.product.name,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
+          ),
+          const SizedBox(height: 8),
+
+          // Price information
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                '₹${(widget.product.discountPrice ?? widget.product.price).toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Colors.green[700],
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              if (widget.product.discountPrice != null) ...[
+              const SizedBox(width: 12),
+              if (widget.product.discountPrice != null)
                 Text(
                   '₹${widget.product.price.toStringAsFixed(2)}',
                   style: TextStyle(
                     decoration: TextDecoration.lineThrough,
                     color: Colors.grey[600],
+                    fontSize: 16,
                   ),
                 ),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                '₹${(widget.product.discountPrice ?? widget.product.price).toStringAsFixed(2)}',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
             ],
           ),
-          const SizedBox(height: 4),
+
+          const SizedBox(height: 16),
+
+          // Stock and unit information
           Row(
             children: [
-              if (widget.product.inStock)
-                const Text(
-                  'In Stock',
-                  style: TextStyle(color: Colors.green),
-                )
-              else
-                const Text(
-                  'Out of Stock',
-                  style: TextStyle(color: Colors.red),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: widget.product.inStock
+                      ? Colors.green[50]
+                      : Colors.red[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: widget.product.inStock ? Colors.green : Colors.red,
+                    width: 1,
+                  ),
                 ),
-              const SizedBox(width: 10),
-              // Add the unit information here
-              Text(
-                widget.product.formattedUnit,
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.w500,
+                child: Text(
+                  widget.product.inStock ? 'In Stock' : 'Out of Stock',
+                  style: TextStyle(
+                    color: widget.product.inStock
+                        ? Colors.green[700]
+                        : Colors.red[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.grey[400]!,
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  widget.product.formattedUnit,
+                  style: TextStyle(
+                    color: Colors.grey[800],
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],
@@ -237,25 +374,43 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   Widget _buildDescription() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Description',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const Icon(Icons.description_outlined, color: Colors.green),
+              const SizedBox(width: 8),
+              Text(
+                'Description',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
+          // Container(
+          //   padding: const EdgeInsets.all(16),
+          //   decoration: BoxDecoration(
+          //     color: Colors.grey[50],
+          //     borderRadius: BorderRadius.circular(12),
+          //     border: Border.all(color: Colors.grey[200]!),
+          //   ),
+          //   child:
           Text(
             widget.product.description,
             style: TextStyle(
-              color: Colors.grey[600],
+              color: Colors.grey[800],
               height: 1.5,
+              fontSize: 15,
             ),
           ),
+          // ),
         ],
       ),
     );
@@ -271,7 +426,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         final isInCart = cartItem != null;
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
@@ -298,6 +453,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             child: Icon(
                               Icons.shopping_cart_outlined,
                               size: 20,
+                              color: Colors.green,
                             ),
                           ),
                           Positioned(
@@ -320,13 +476,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                         ],
                       ),
-                      label: const Text('View Cart'),
+                      label: const Text(
+                        'View Cart',
+                        style: TextStyle(color: Colors.green),
+                      ),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                            vertical: 9, horizontal: 0),
+                            vertical: 12, horizontal: 0),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
-                        side: BorderSide(color: Colors.green),
+                        side: BorderSide(color: Colors.green[700]!),
                       ),
                     ),
                   ),
@@ -336,7 +495,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.green[700],
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -376,8 +535,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                      '${widget.product.name} added to cart'),
+                                    '${widget.product.name} added to cart',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                  backgroundColor: Colors.green[700],
                                   behavior: SnackBarBehavior.floating,
+                                  action: SnackBarAction(
+                                    label: 'VIEW',
+                                    textColor: Colors.white,
+                                    onPressed: () => Get.to(() => CartPage()),
+                                  ),
                                 ),
                               );
                             }
@@ -387,8 +554,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                        elevation: 2,
                       ),
                       child: const Text(
                         'Add to Cart',

@@ -32,7 +32,6 @@ class _ProductsPageState extends State<ProductsPage> {
   final ScrollController _scrollController = ScrollController();
   final PromotionService _promotionService = PromotionService();
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,16 +144,20 @@ class _ProductsPageState extends State<ProductsPage> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const Spacer(),
-          IconButton(
-            icon: Icon(
-              Icons.account_circle_outlined,
-              color: Colors.grey[800],
-            ),
-            onPressed: () => Get.to(() => ProfilePage()),
-          ),
+          // const Spacer(),
         ],
       ),
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.account_circle_outlined,
+            color: Colors.grey[800],
+            size: 36,
+          ),
+          onPressed: () => Get.to(() => ProfilePage()),
+        ),
+        const SizedBox(width: 8),
+      ],
     );
   }
 
@@ -329,17 +332,18 @@ class _ProductsPageState extends State<ProductsPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     if (promotion.title.isNotEmpty)
-                                      Flexible(
-                                        child: Text(
-                                          promotion.title,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
+                                      // Flexible(
+                                      //   child:
+                                      Text(
+                                        promotion.title,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
                                         ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
+                                    // ),
                                     if (promotion.subtitle.isNotEmpty)
                                       Flexible(
                                         child: Text(
@@ -514,18 +518,18 @@ class _ProductsPageState extends State<ProductsPage> {
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: InkWell(
         onTap: () => Get.to(() => ProductDetailPage(product: product)),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Flexible(
-              flex: 4,
+              flex: 10,
               child: ClipRRect(
                 borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
+                    const BorderRadius.vertical(top: Radius.circular(10)),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -548,8 +552,8 @@ class _ProductsPageState extends State<ProductsPage> {
                     ),
                     if (product.discountPrice != null)
                       Positioned(
-                        top: 8,
-                        right: 8,
+                        top: 2,
+                        right: 2,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -563,7 +567,7 @@ class _ProductsPageState extends State<ProductsPage> {
                             '${(((product.price - product.discountPrice!) / product.price) * 100).round()}% OFF',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 12,
+                              fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -573,15 +577,15 @@ class _ProductsPageState extends State<ProductsPage> {
                 ),
               ),
             ),
+            // const Spacer(),
             Flexible(
-              flex: 5,
+              flex: 7,
               child: Padding(
                 padding: const EdgeInsets.only(left: 8, right: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 2),
-
+                    // const SizedBox(height: 2),
                     Text(
                       product.name,
                       style: const TextStyle(
@@ -591,8 +595,7 @@ class _ProductsPageState extends State<ProductsPage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-
-                    const SizedBox(height: 2),
+                    // const SizedBox(height: 2),
                     Flexible(
                       child: Text(
                         product.description,
@@ -637,7 +640,7 @@ class _ProductsPageState extends State<ProductsPage> {
                         _buildCartButton(product, cart, cartItem, inCart),
                       ],
                     ),
-                    const Spacer(),
+                    const SizedBox(width: 2),
                   ],
                 ),
               ),

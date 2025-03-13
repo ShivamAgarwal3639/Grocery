@@ -183,7 +183,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       actions: [
         IconButton(
           icon:
-              const Icon(Icons.account_circle_outlined, color: Colors.black87),
+              const Icon(Icons.account_circle_outlined, color: Colors.black87, size: 36,),
           onPressed: () => Get.to(() => ProfilePage()),
         ),
         const SizedBox(width: 8),

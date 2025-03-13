@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'notifier/auth_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/home_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +54,10 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.light,
           useMaterial3: true,
           scaffoldBackgroundColor: Colors.grey[100],
+          // Apply the Google Font to all text in the app
+          textTheme: GoogleFonts.nunitoSansTextTheme(Theme.of(context).textTheme),
+          // You can also set it for specific text styles
+          // headlineSmall: GoogleFonts.montserrat(),
           snackBarTheme: const SnackBarThemeData(
             behavior: SnackBarBehavior.floating,
           ),
