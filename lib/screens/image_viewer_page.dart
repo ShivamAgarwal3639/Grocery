@@ -1,3 +1,4 @@
+import 'package:Super96Store/utils/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:photo_view/photo_view.dart';
@@ -108,6 +109,7 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(7),
                 child: CachedNetworkImage(
+                  cacheManager: Utility.customCacheManager,
                   imageUrl: widget.imageUrls[index],
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(

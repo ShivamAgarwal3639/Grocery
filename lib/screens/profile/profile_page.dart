@@ -221,6 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: ClipOval(
                     child: user.profileImage != null
                         ? CachedNetworkImage(
+                      cacheManager: Utility.customCacheManager,
                             imageUrl: user.profileImage!,
                             width: 120,
                             height: 120,

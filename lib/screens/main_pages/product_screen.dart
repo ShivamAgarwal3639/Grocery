@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:Super96Store/utils/utility.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -536,6 +537,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     Hero(
                       tag: 'product-${product.id}',
                       child: CachedNetworkImage(
+                        cacheManager: Utility.customCacheManager,
                         imageUrl: product.imageUrls.first,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(

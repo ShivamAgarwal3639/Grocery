@@ -1,3 +1,4 @@
+import 'package:Super96Store/utils/utility.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -265,6 +266,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     ),
                     child: ClipOval(
                       child: CachedNetworkImage(
+                        cacheManager: Utility.customCacheManager,
                         imageUrl: category.imageUrl,
                         fit: BoxFit.fill,
                         placeholder: (context, url) => Container(

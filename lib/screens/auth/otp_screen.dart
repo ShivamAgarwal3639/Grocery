@@ -123,7 +123,7 @@ class _OTPScreenState extends State<OTPScreen> {
                 ),
 
                 // Section separator
-                _buildSectionSeparator('Enter 6-digit verification code'),
+                _buildSectionSeparator('Enter 4-digit verification code'),
 
                 // OTP field
                 Padding(

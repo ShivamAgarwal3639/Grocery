@@ -1,4 +1,5 @@
 import 'package:Super96Store/screens/auth/home_screen.dart';
+import 'package:Super96Store/utils/utility.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -563,6 +564,7 @@ class _CartPageState extends State<CartPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: CachedNetworkImage(
+                cacheManager: Utility.customCacheManager,
                 imageUrl: item.product.imageUrls.isNotEmpty?item.product.imageUrls[0]:"",
                 width: 60,
                 height: 60,

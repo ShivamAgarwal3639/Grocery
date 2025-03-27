@@ -1,3 +1,4 @@
+import 'package:Super96Store/utils/utility.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -248,6 +249,7 @@ class _SearchPageState extends State<SearchPage> {
                 child: Hero(
                   tag: 'search-${product.id}',
                   child: CachedNetworkImage(
+                    cacheManager: Utility.customCacheManager,
                     imageUrl: product.imageUrls.first,
                     width: 100,
                     height: 100,

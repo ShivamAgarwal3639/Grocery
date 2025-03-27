@@ -1,3 +1,4 @@
+import 'package:Super96Store/utils/utility.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -263,6 +264,7 @@ class _CategoryItemsPageState extends State<CategoryItemsPage> {
                     Hero(
                       tag: 'product-${product.id}',
                       child: CachedNetworkImage(
+                        cacheManager: Utility.customCacheManager,
                         imageUrl: product.imageUrls.first,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(

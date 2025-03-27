@@ -1,4 +1,5 @@
 import 'package:Super96Store/screens/image_viewer_page.dart';
+import 'package:Super96Store/utils/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Super96Store/notifier/cart_notifier.dart';
@@ -158,6 +159,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         initialIndex: _currentImageIndex));
                   },
                   child: CachedNetworkImage(
+                    cacheManager: Utility.customCacheManager,
                     imageUrl: widget.product.imageUrls[index],
                     fit: BoxFit.contain,
                     placeholder: (context, url) => Container(
@@ -267,6 +269,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: CachedNetworkImage(
+                  cacheManager: Utility.customCacheManager,
                   imageUrl: widget.product.imageUrls[index],
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(

@@ -2,11 +2,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:Super96Store/notifier/auth_provider.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class Utility {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+
+  static final customCacheManager = CacheManager(
+    Config(
+      'customImageCache',
+      stalePeriod: Duration(days: 30), // Refresh after 24 hours
+      maxNrOfCacheObjects: 450,
+      repo: JsonCacheInfoRepository(databaseName: 'imageCache'),
+      fileService: HttpFileService(),
+    ),
+  );
 
   static Future<void> _updateUserFCMToken(String phoneNumber) async {
     try {

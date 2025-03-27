@@ -8,6 +8,8 @@ import 'package:Super96Store/screens/%20order_details_page.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../utils/utility.dart';
+
 class OrderListPage extends StatelessWidget {
   const OrderListPage({super.key});
 
@@ -226,6 +228,7 @@ class _OrderCard extends StatelessWidget {
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: CachedNetworkImage(
+                          cacheManager: Utility.customCacheManager,
                           imageUrl: item.product.imageUrls.isNotEmpty
                               ? item.product.imageUrls[0]
                               : "",

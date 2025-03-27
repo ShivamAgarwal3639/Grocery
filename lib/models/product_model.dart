@@ -24,6 +24,7 @@ class ProductModel {
   // New fields for unit specification
   final ProductUnit unit;
   final double unitValue;
+  final List<String> thumbnailUrls; // New field for thumbnail URLs
 
   ProductModel({
     required this.id,
@@ -41,6 +42,7 @@ class ProductModel {
     required this.updatedAt,
     this.unit = ProductUnit.pieces,
     this.unitValue = 1,
+    this.thumbnailUrls = const [],
   });
 
   factory ProductModel.fromMap(Map<String, dynamic> map) {
@@ -65,9 +67,10 @@ class ProductModel {
       // Parse unit information
       unit: map['unit'] != null
           ? ProductUnit.values.firstWhere((e) => describeEnum(e) == map['unit'],
-              orElse: () => ProductUnit.pieces)
+          orElse: () => ProductUnit.pieces)
           : ProductUnit.pieces,
       unitValue: (map['unitValue'] as num?)?.toDouble() ?? 1,
+      thumbnailUrls: List<String>.from(map['thumbnailUrls'] ?? []),
     );
   }
 
@@ -89,6 +92,7 @@ class ProductModel {
       // Add unit information to map
       'unit': describeEnum(unit),
       'unitValue': unitValue,
+      'thumbnailUrls': thumbnailUrls,
     };
   }
 
@@ -108,6 +112,7 @@ class ProductModel {
     DateTime? updatedAt,
     ProductUnit? unit,
     double? unitValue,
+    List<String>? thumbnailUrls,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -125,6 +130,7 @@ class ProductModel {
       updatedAt: updatedAt ?? this.updatedAt,
       unit: unit ?? this.unit,
       unitValue: unitValue ?? this.unitValue,
+      thumbnailUrls: thumbnailUrls ?? this.thumbnailUrls,
     );
   }
 
